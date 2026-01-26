@@ -8,7 +8,7 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import no.nav.helsemelding.messagegenerator.model.PayloadDialogMessage
+import no.nav.helsemelding.messagegenerator.model.DialogMessage
 import no.nav.helsemelding.messagegenerator.publisher.DialogMessagePublisher
 import no.nav.helsemelding.messagegenerator.util.nowWithOffset
 import no.nav.helsemelding.messagegenerator.util.readFileToList
@@ -30,7 +30,7 @@ class DialogMessageProcessor(
             .flowOn(Dispatchers.IO)
             .launchIn(scope)
 
-    private fun messageFlow(): Flow<PayloadDialogMessage> {
+    private fun messageFlow(): Flow<DialogMessage> {
         val uuid = Uuid.random()
         val params = mapOf(
             "{genDate}" to nowWithOffset(),
@@ -39,12 +39,12 @@ class DialogMessageProcessor(
             "{patientName}" to names.random(),
             "{message}" to messages.random()
         )
-        val ebxml = replaceInTemplate(template, params)
-        return flowOf(PayloadDialogMessage(uuid, ebxml))
+        val xml = replaceInTemplate(template, params)
+        return flowOf(DialogMessage(uuid, xml))
     }
 
-    private suspend fun publishDialogMessage(dialogMessage: PayloadDialogMessage): Result<RecordMetadata> =
-        dialogMessagePublisher.publish(dialogMessage.id, dialogMessage.payload)
+    private suspend fun publishDialogMessage(dialogMessage: DialogMessage): Result<RecordMetadata> =
+        dialogMessagePublisher.publish(dialogMessage.id, dialogMessage.xml)
 }
 
 fun replaceInTemplate(template: String, params: Map<String, String>): String =

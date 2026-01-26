@@ -2,7 +2,7 @@ package no.nav.helsemelding.messagegenerator.model
 
 import kotlin.uuid.Uuid
 
-data class PayloadDialogMessage(
+data class DialogMessage(
     val id: Uuid,
-    val payload: String
+    val xml: String
 )
