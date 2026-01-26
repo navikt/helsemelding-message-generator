@@ -54,7 +54,7 @@ internal fun messageGeneratorModule(
 }
 
 private suspend fun ResourceScope.scheduleProcessDialogMessages(processor: DialogMessageProcessor) {
-    val scheduleConfig = config().kafkaTopics.dialogMessage
+    val scheduleConfig = config().kafka.topics.dialogMessage
     if (!scheduleConfig.enabled) {
         return
     }

@@ -10,7 +10,6 @@ import kotlin.time.Duration
 data class Config(
     val server: Server,
     val kafka: Kafka,
-    val kafkaTopics: KafkaTopics
 )
 
 data class Server(
@@ -27,7 +26,8 @@ data class Kafka(
     val keystorePassword: Masked,
     val truststoreType: TruststoreType,
     val truststoreLocation: TruststoreLocation,
-    val truststorePassword: Masked
+    val truststorePassword: Masked,
+    val topics: Topics
 ) {
     private val securityProtocolConfig = "security.protocol"
     private val sslKeystoreTypeConfig = "ssl.keystore.type"
@@ -72,7 +72,7 @@ data class Kafka(
         }
 }
 
-data class KafkaTopics(
+data class Topics(
     val dialogMessage: DialogMessage
 )
 

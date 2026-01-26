@@ -17,7 +17,7 @@ interface MessagePublisher {
 class DialogMessagePublisher(
     private val kafkaPublisher: KafkaPublisher<String, ByteArray>
 ) : MessagePublisher {
-    private val kafka = config().kafkaTopics
+    private val kafka = config().kafka.topics
 
     override suspend fun publish(
         referenceId: Uuid,
