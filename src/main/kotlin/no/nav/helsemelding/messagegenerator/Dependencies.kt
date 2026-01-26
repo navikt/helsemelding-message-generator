@@ -23,7 +23,7 @@ internal suspend fun ResourceScope.metricsRegistry(): PrometheusMeterRegistry =
 
 internal suspend fun ResourceScope.kafkaPublisher(kafka: Kafka): KafkaPublisher<String, ByteArray> =
     install({ KafkaPublisher(kafka.toPublisherSettings()) }) { p, _: ExitCase ->
-        p.close().also { log.info("Closed kafka publisher") }
+        p.close().also { log.info { "Closed kafka publisher" } }
     }
 
 suspend fun ResourceScope.dependencies(): Dependencies = awaitAll {

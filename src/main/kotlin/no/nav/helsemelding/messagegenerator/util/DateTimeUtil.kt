@@ -13,6 +13,6 @@ import kotlinx.datetime.offsetAt
  * Example: `2026-08-30T19:43:00.123456789+01:00`
  */
 fun nowWithOffset(now: Instant = Clock.System.now()): String {
-    val offsetNow = TimeZone.currentSystemDefault().offsetAt(now)
+    val offsetNow = TimeZone.of("Europe/Oslo").offsetAt(now)
     return now.format(DateTimeComponents.Formats.ISO_DATE_TIME_OFFSET, offsetNow)
 }
