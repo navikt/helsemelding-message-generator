@@ -4,5 +4,5 @@ import kotlin.uuid.Uuid
 
 data class PayloadDialogMessage(
     val id: Uuid,
-    val payload: ByteArray
+    val payload: String
 )

@@ -79,8 +79,7 @@ data class KafkaTopics(
 data class DialogMessage(
     val topic: String,
     val enabled: Boolean,
-    val fixedInterval: Duration,
-    val initialDelay: Duration
+    val fixedInterval: Duration
 )
 
 @JvmInline

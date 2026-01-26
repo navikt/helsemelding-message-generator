@@ -16,7 +16,7 @@
                         <TypeId DN="Organisasjonsnummeret i Enhetsregister (Brønnøysund)" S="1.16.578.1.12.3.1.1.9051" V="ENH" />
                     </Ident>
                     <Ident>
-                        <Id>0123</Id>
+                        <Id>{herId}</Id>
                         <TypeId DN="Identifikator fra Helsetjenesteenhetsregisteret (HER-id)" V="HER" S="1.23.456.7.89.1.2.3.4567.8912" />
                     </Ident>
                     <Address>
@@ -61,7 +61,7 @@
                         <TypeId DN="Organisasjonsnummeret i Enhetsregister (Brønnøysund)" S="2.16.578.1.12.4.1.1.9051" V="ENH" />
                     </Ident>
                     <Ident>
-                        <Id>79768</Id>
+                        <Id>{herId}</Id>
                         <TypeId DN="Identifikator fra Helsetjenesteenhetsregisteret (HER-id)" S="2.16.578.1.12.4.1.1.9051" V="HER" />
                     </Ident>
                 </Organisation>

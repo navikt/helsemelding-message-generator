@@ -18,8 +18,6 @@ import no.nav.helsemelding.messagegenerator.plugin.configureRoutes
 import no.nav.helsemelding.messagegenerator.processor.DialogMessageProcessor
 import no.nav.helsemelding.messagegenerator.publisher.DialogMessagePublisher
 import no.nav.helsemelding.messagegenerator.util.coroutineScope
-import no.nav.helsemelding.messagegenerator.util.readFileToList
-import no.nav.helsemelding.messagegenerator.util.readFileToString
 
 private val log = KotlinLogging.logger {}
 
@@ -36,16 +34,7 @@ fun main() = SuspendApp {
             )
 
             val dialogMessagePublisher = DialogMessagePublisher(deps.kafkaPublisher)
-            // TODO: What should happen if config is missing?
-            val names = readFileToList("names.txt")
-            val messages = readFileToList("messages.txt")
-            val dialogMessageTemplate = readFileToString("templates/dialogMessage.xml") ?: ""
-            val dialogMessageProcessor = DialogMessageProcessor(
-                dialogMessagePublisher,
-                dialogMessageTemplate,
-                names,
-                messages
-            )
+            val dialogMessageProcessor = DialogMessageProcessor(dialogMessagePublisher)
 
             scheduleProcessDialogMessages(dialogMessageProcessor)
 
@@ -64,10 +53,14 @@ internal fun messageGeneratorModule(
     }
 }
 
-private suspend fun ResourceScope.scheduleProcessDialogMessages(processor: DialogMessageProcessor): Long {
+private suspend fun ResourceScope.scheduleProcessDialogMessages(processor: DialogMessageProcessor) {
+    val scheduleConfig = config().kafkaTopics.dialogMessage
+    if (!scheduleConfig.enabled) {
+        return
+    }
     val scope = coroutineScope(currentCoroutineContext())
-    return Schedule
-        .spaced<Unit>(config().kafkaTopics.dialogMessage.fixedInterval)
+    Schedule
+        .spaced<Unit>(scheduleConfig.fixedInterval)
         .repeat { processor.processMessages(scope) }
 }
 
