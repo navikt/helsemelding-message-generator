@@ -9,7 +9,7 @@ import kotlin.time.Duration
 
 data class Config(
     val server: Server,
-    val kafka: Kafka,
+    val kafka: Kafka
 )
 
 data class Server(
