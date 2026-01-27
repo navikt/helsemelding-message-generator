@@ -79,7 +79,7 @@ data class Topics(
 data class DialogMessage(
     val topic: String,
     val enabled: Boolean,
-    val fixedInterval: Duration
+    val interval: Duration
 )
 
 @JvmInline

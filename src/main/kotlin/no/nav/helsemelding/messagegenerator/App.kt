@@ -60,7 +60,7 @@ private suspend fun ResourceScope.scheduleProcessDialogMessages(processor: Dialo
     }
     val scope = coroutineScope(currentCoroutineContext())
     Schedule
-        .spaced<Unit>(scheduleConfig.fixedInterval)
+        .spaced<Unit>(scheduleConfig.interval)
         .repeat { processor.processMessages(scope) }
 }
 
