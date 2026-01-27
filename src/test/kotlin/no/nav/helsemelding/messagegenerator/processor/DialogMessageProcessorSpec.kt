@@ -26,7 +26,7 @@ class DialogMessageProcessorSpec : StringSpec(
             val myMap = mapOf(
                 "{genDate}" to genDate,
                 "{messageId}" to uuid,
-                "{herId}" to ADRESSEREGISTERET_HELSEOPPLYSNINGER_TEST1,
+                "{herId}" to ADRESSEREGISTERET_HELSEOPPLYSNINGER_TEST1_HERID,
                 "{patientName}" to name,
                 "{message}" to message
             )
@@ -41,9 +41,9 @@ class DialogMessageProcessorSpec : StringSpec(
 
             replacedXml shouldContain "<GenDate>$genDate</GenDate>"
             replacedXml shouldContain "<MsgId>$uuid</MsgId>"
-            replacedXml shouldContain "<Id>$ADRESSEREGISTERET_HELSEOPPLYSNINGER_TEST1</Id>"
+            replacedXml shouldContain "<Id>$ADRESSEREGISTERET_HELSEOPPLYSNINGER_TEST1_HERID</Id>"
             replacedXml shouldContain "<GivenName>$name</GivenName>"
-            replacedXml shouldContain """<TekstNotatInnhold xsi:type="xsd:string">$message</TekstNotatInnhold>"""
+            replacedXml shouldContain "<Sporsmal>$message</Sporsmal>"
         }
     }
 )
