@@ -9,7 +9,7 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import no.nav.helsemelding.messagegenerator.model.DialogMessage
-import no.nav.helsemelding.messagegenerator.publisher.DialogMessagePublisher
+import no.nav.helsemelding.messagegenerator.publisher.MessagePublisher
 import no.nav.helsemelding.messagegenerator.util.nowWithOffset
 import no.nav.helsemelding.messagegenerator.util.readFileToList
 import no.nav.helsemelding.messagegenerator.util.readFileToString
@@ -19,7 +19,7 @@ import kotlin.uuid.Uuid
 const val ADRESSEREGISTERET_HELSEOPPLYSNINGER_TEST1_HERID = "8142519"
 
 class DialogMessageProcessor(
-    private val dialogMessagePublisher: DialogMessagePublisher,
+    private val messagePublisher: MessagePublisher,
     private val template: String = readFileToString("templates/dialogMessage.xml") ?: "",
     private val names: List<String> = readFileToList("names.txt").orEmpty(),
     private val messages: List<String> = readFileToList("messages.txt").orEmpty()
@@ -44,7 +44,7 @@ class DialogMessageProcessor(
     }
 
     private suspend fun publishDialogMessage(dialogMessage: DialogMessage): Result<RecordMetadata> =
-        dialogMessagePublisher.publish(dialogMessage.id, dialogMessage.xml)
+        messagePublisher.publish(dialogMessage.id, dialogMessage.xml)
 }
 
 fun replaceInTemplate(template: String, params: Map<String, String>): String =

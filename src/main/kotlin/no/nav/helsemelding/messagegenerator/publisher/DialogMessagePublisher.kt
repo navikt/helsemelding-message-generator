@@ -26,7 +26,7 @@ class DialogMessagePublisher(
         .publishScope {
             publishCatching(toProducerRecord(referenceId, message))
         }
-        .onSuccess { log.info { "Published message with reference id $referenceId to topic: ${kafka.dialogMessage.topic}" } }
+        .onSuccess { log.info { "Published message with reference id: $referenceId to topic: ${kafka.dialogMessage.topic}" } }
         .onFailure { log.error { "Failed to publish message with reference id: $referenceId" } }
 
     private fun toProducerRecord(referenceId: Uuid, message: String) =
@@ -50,6 +50,8 @@ class FakeDialogMessagePublisher : MessagePublisher {
             referenceId.toString().length,
             message.toByteArray().size
         )
+
+        log.info { "Published message with reference id: $referenceId" }
 
         return Result.success(metadata)
     }
