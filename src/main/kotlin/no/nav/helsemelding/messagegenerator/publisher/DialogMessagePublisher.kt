@@ -27,7 +27,7 @@ class DialogMessagePublisher(
             publishCatching(toProducerRecord(referenceId, message))
         }
         .onSuccess { log.info { "Published message with reference id: $referenceId to topic: ${kafka.dialogMessage.topic}" } }
-        .onFailure { t -> log.error { "Failed to publish message with reference id $referenceId: ${t.stackTraceToString()}" } }
+        .onFailure { t -> log.error { "Failed to publish message with reference id: $referenceId: ${t.stackTraceToString()}" } }
 
     private fun toProducerRecord(referenceId: Uuid, message: String) =
         ProducerRecord(
