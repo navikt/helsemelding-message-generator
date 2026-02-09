@@ -1,8 +1,14 @@
 package no.nav.helsemelding.messagegenerator.processor
 
+import io.kotest.core.spec.style.FunSpec
 import io.kotest.core.spec.style.StringSpec
+import io.kotest.datatest.withData
+import io.kotest.matchers.collections.shouldBeOneOf
 import io.kotest.matchers.string.shouldContain
 import io.kotest.matchers.string.shouldNotContain
+import io.kotest.matchers.types.shouldBeInstanceOf
+import no.nav.helsemelding.messagegenerator.model.InvalidDialogMessage
+import no.nav.helsemelding.messagegenerator.model.ValidDialogMessage
 import no.nav.helsemelding.messagegenerator.util.nowWithOffset
 import no.nav.helsemelding.messagegenerator.util.readFileToString
 import kotlin.uuid.Uuid
@@ -47,3 +53,24 @@ class DialogMessageProcessorSpec : StringSpec(
         }
     }
 )
+
+class NextDialogMessageSpec : FunSpec({
+    val xml = "<MsgHead></MsgHead>"
+
+    context("Create type of dialog message based on number") {
+        withData(
+            nameFn = { "Number $it creates a valid dialog message" },
+            1..9
+        ) { number ->
+            nextDialogMessage(xml, number).shouldBeInstanceOf<ValidDialogMessage>()
+        }
+
+        withData(
+            nameFn = { "Number $it creates an invalid dialog message" },
+            listOf(10)
+        ) { number ->
+            val invalidDialogMessage = nextDialogMessage(xml, number).shouldBeInstanceOf<InvalidDialogMessage>()
+            invalidDialogMessage.id.shouldBeOneOf(null, "", "1234-abcd")
+        }
+    }
+})

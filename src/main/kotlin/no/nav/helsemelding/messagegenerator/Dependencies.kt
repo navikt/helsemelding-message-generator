@@ -13,7 +13,7 @@ private val log = KotlinLogging.logger {}
 
 data class Dependencies(
     val meterRegistry: PrometheusMeterRegistry,
-    val kafkaPublisher: KafkaPublisher<String, ByteArray>
+    val kafkaPublisher: KafkaPublisher<String?, ByteArray>
 )
 
 internal suspend fun ResourceScope.metricsRegistry(): PrometheusMeterRegistry =
@@ -21,7 +21,7 @@ internal suspend fun ResourceScope.metricsRegistry(): PrometheusMeterRegistry =
         p.close().also { log.info { "Closed prometheus registry" } }
     }
 
-internal suspend fun ResourceScope.kafkaPublisher(kafka: Kafka): KafkaPublisher<String, ByteArray> =
+internal suspend fun ResourceScope.kafkaPublisher(kafka: Kafka): KafkaPublisher<String?, ByteArray> =
     install({ KafkaPublisher(kafka.toPublisherSettings()) }) { p, _: ExitCase ->
         p.close().also { log.info { "Closed kafka publisher" } }
     }
