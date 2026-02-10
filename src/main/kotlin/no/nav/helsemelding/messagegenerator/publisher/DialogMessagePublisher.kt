@@ -6,21 +6,20 @@ import no.nav.helsemelding.messagegenerator.config
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.apache.kafka.clients.producer.RecordMetadata
 import org.apache.kafka.common.TopicPartition
-import kotlin.uuid.Uuid
 
 private val log = KotlinLogging.logger {}
 
 interface MessagePublisher {
-    suspend fun publish(referenceId: Uuid, message: String): Result<RecordMetadata>
+    suspend fun publish(referenceId: String?, message: String): Result<RecordMetadata>
 }
 
 class DialogMessagePublisher(
-    private val kafkaPublisher: KafkaPublisher<String, ByteArray>
+    private val kafkaPublisher: KafkaPublisher<String?, ByteArray>
 ) : MessagePublisher {
     private val kafka = config().kafka.topics
 
     override suspend fun publish(
-        referenceId: Uuid,
+        referenceId: String?,
         message: String
     ): Result<RecordMetadata> = kafkaPublisher
         .publishScope {
@@ -29,17 +28,17 @@ class DialogMessagePublisher(
         .onSuccess { log.info { "Published message with reference id: $referenceId to topic: ${kafka.dialogMessage.topic}" } }
         .onFailure { t -> log.error { "Failed to publish message with reference id: $referenceId: ${t.stackTraceToString()}" } }
 
-    private fun toProducerRecord(referenceId: Uuid, message: String) =
+    private fun toProducerRecord(referenceId: String?, message: String) =
         ProducerRecord(
             kafka.dialogMessage.topic,
-            referenceId.toString(),
+            referenceId,
             message.toByteArray()
         )
 }
 
 class FakeDialogMessagePublisher : MessagePublisher {
     override suspend fun publish(
-        referenceId: Uuid,
+        referenceId: String?,
         message: String
     ): Result<RecordMetadata> {
         val metadata = RecordMetadata(

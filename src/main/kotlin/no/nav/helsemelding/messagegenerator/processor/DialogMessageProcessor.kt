@@ -9,6 +9,8 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import no.nav.helsemelding.messagegenerator.model.DialogMessage
+import no.nav.helsemelding.messagegenerator.model.InvalidDialogMessage
+import no.nav.helsemelding.messagegenerator.model.ValidDialogMessage
 import no.nav.helsemelding.messagegenerator.publisher.MessagePublisher
 import no.nav.helsemelding.messagegenerator.util.nowWithOffset
 import no.nav.helsemelding.messagegenerator.util.readFileToList
@@ -17,6 +19,7 @@ import org.apache.kafka.clients.producer.RecordMetadata
 import kotlin.uuid.Uuid
 
 const val ADRESSEREGISTERET_HELSEOPPLYSNINGER_TEST1_HERID = "8142519"
+val invalidRecordKeys = listOf(null, "", "1234-abcd")
 
 class DialogMessageProcessor(
     private val messagePublisher: MessagePublisher,
@@ -40,11 +43,18 @@ class DialogMessageProcessor(
             "{message}" to messages.random()
         )
         val xml = replaceInTemplate(template, params)
-        return flowOf(DialogMessage(uuid, xml))
+        return flowOf(nextDialogMessage(xml, (1..10).random()))
     }
 
     private suspend fun publishDialogMessage(dialogMessage: DialogMessage): Result<RecordMetadata> =
         messagePublisher.publish(dialogMessage.id, dialogMessage.xml)
+}
+
+internal fun nextDialogMessage(xml: String, number: Int): DialogMessage {
+    return when (number) {
+        in 1..9 -> ValidDialogMessage(Uuid.random(), xml)
+        else -> InvalidDialogMessage(invalidRecordKeys.random(), xml)
+    }
 }
 
 fun replaceInTemplate(template: String, params: Map<String, String>): String =
