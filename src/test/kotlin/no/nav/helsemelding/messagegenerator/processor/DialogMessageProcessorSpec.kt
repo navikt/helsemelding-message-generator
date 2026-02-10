@@ -1,8 +1,7 @@
 package no.nav.helsemelding.messagegenerator.processor
 
-import io.kotest.core.spec.style.FunSpec
 import io.kotest.core.spec.style.StringSpec
-import io.kotest.datatest.withData
+import io.kotest.inspectors.forAll
 import io.kotest.matchers.collections.shouldBeOneOf
 import io.kotest.matchers.string.shouldContain
 import io.kotest.matchers.string.shouldNotContain
@@ -51,26 +50,18 @@ class DialogMessageProcessorSpec : StringSpec(
             replacedXml shouldContain "<GivenName>$name</GivenName>"
             replacedXml shouldContain "<Sporsmal>$message</Sporsmal>"
         }
-    }
-)
 
-class NextDialogMessageSpec : FunSpec({
-    val xml = "<MsgHead></MsgHead>"
+        val xml = "<MsgHead></MsgHead>"
 
-    context("Create type of dialog message based on number") {
-        withData(
-            nameFn = { "Number $it creates a valid dialog message" },
-            1..9
-        ) { number ->
-            nextDialogMessage(xml, number).shouldBeInstanceOf<ValidDialogMessage>()
+        "Number 1 through 9 should create a valid dialog message" {
+            (1..9).toList().forAll { number ->
+                nextDialogMessage(xml, number).shouldBeInstanceOf<ValidDialogMessage>()
+            }
         }
 
-        withData(
-            nameFn = { "Number $it creates an invalid dialog message" },
-            listOf(10)
-        ) { number ->
-            val invalidDialogMessage = nextDialogMessage(xml, number).shouldBeInstanceOf<InvalidDialogMessage>()
+        "Number 10 should create an invalid dialog message" {
+            val invalidDialogMessage = nextDialogMessage(xml, 10).shouldBeInstanceOf<InvalidDialogMessage>()
             invalidDialogMessage.id.shouldBeOneOf(null, "", "1234-abcd")
         }
     }
-})
+)
