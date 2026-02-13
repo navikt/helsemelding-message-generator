@@ -19,7 +19,8 @@ class DialogMessageProcessorSpec : StringSpec(
 
             xml shouldContain "{genDate}"
             xml shouldContain "{messageId}"
-            xml shouldContain "{herId}"
+            xml shouldContain "{senderHerId}"
+            xml shouldContain "{receiverHerId}"
             xml shouldContain "{patientName}"
             xml shouldContain "{message}"
 
@@ -31,7 +32,8 @@ class DialogMessageProcessorSpec : StringSpec(
             val myMap = mapOf(
                 "{genDate}" to genDate,
                 "{messageId}" to uuid,
-                "{herId}" to ADRESSEREGISTERET_HELSEOPPLYSNINGER_TEST1_HERID,
+                "{senderHerId}" to FAGSYSTEM_HERID,
+                "{receiverHerId}" to EPJ_HERID,
                 "{patientName}" to name,
                 "{message}" to message
             )
@@ -40,13 +42,15 @@ class DialogMessageProcessorSpec : StringSpec(
 
             replacedXml shouldNotContain "{genDate}"
             replacedXml shouldNotContain "{messageId}"
-            replacedXml shouldNotContain "{herId}"
+            replacedXml shouldNotContain "{senderHerId}"
+            replacedXml shouldNotContain "{receiverHerId}"
             replacedXml shouldNotContain "{patientName}"
             replacedXml shouldNotContain "{message}"
 
             replacedXml shouldContain "<GenDate>$genDate</GenDate>"
             replacedXml shouldContain "<MsgId>$uuid</MsgId>"
-            replacedXml shouldContain "<Id>$ADRESSEREGISTERET_HELSEOPPLYSNINGER_TEST1_HERID</Id>"
+            replacedXml shouldContain "<Id>$FAGSYSTEM_HERID</Id>"
+            replacedXml shouldContain "<Id>$EPJ_HERID</Id>"
             replacedXml shouldContain "<GivenName>$name</GivenName>"
             replacedXml shouldContain "<Sporsmal>$message</Sporsmal>"
         }

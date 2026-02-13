@@ -18,7 +18,7 @@
                 <Organisation>
                     <OrganisationName>Samhandling Arbeids- og velferdsetaten</OrganisationName>
                     <Ident>
-                        <Id>{herId}</Id>
+                        <Id>{senderHerId}</Id>
                         <TypeId V="HER" DN="HER-id" S="2.16.578.1.12.4.1.1.9051"/>
                     </Ident>
                 </Organisation>
@@ -34,7 +34,7 @@
                 <Organisation>
                     <OrganisationName>Samhandling Arbeids- og velferdsetaten</OrganisationName>
                     <Ident>
-                        <Id>{herId}</Id>
+                        <Id>{receiverHerId}</Id>
                         <TypeId V="HER" DN="HER-id" S="2.16.578.1.12.4.1.1.9051"/>
                     </Ident>
                 </Organisation>
