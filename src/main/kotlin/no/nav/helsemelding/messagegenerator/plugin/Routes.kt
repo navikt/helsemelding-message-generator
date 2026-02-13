@@ -18,7 +18,7 @@ fun Application.configureRoutes(
 ) {
     routing {
         internalRoutes(registry)
-        externalRoutes(registry, dialogMessageProcessor)
+        externalRoutes(dialogMessageProcessor)
     }
 }
 
@@ -36,8 +36,7 @@ fun Route.internalRoutes(registry: PrometheusMeterRegistry) {
     }
 }
 
-@Suppress("UNUSED_PARAMETER")
-fun Route.externalRoutes(registry: PrometheusMeterRegistry, dialogMessageProcessor: DialogMessageProcessor) {
+fun Route.externalRoutes(dialogMessageProcessor: DialogMessageProcessor) {
     get("/generate-messages") {
         var count = call.request.queryParameters["count"]?.toIntOrNull() ?: 1
         if (count > 100) count = 100
