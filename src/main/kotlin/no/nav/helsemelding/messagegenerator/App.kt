@@ -26,15 +26,15 @@ fun main() = SuspendApp {
         resourceScope {
             val deps = dependencies()
 
+            val dialogMessagePublisher = DialogMessagePublisher(deps.kafkaPublisher)
+            val dialogMessageProcessor = DialogMessageProcessor(dialogMessagePublisher)
+
             server(
                 Netty,
                 port = config().server.port.value,
                 preWait = config().server.preWait,
-                module = messageGeneratorModule(deps.meterRegistry)
+                module = messageGeneratorModule(deps.meterRegistry, dialogMessageProcessor)
             )
-
-            val dialogMessagePublisher = DialogMessagePublisher(deps.kafkaPublisher)
-            val dialogMessageProcessor = DialogMessageProcessor(dialogMessagePublisher)
 
             scheduleProcessDialogMessages(dialogMessageProcessor)
 
@@ -45,11 +45,12 @@ fun main() = SuspendApp {
 }
 
 internal fun messageGeneratorModule(
-    meterRegistry: PrometheusMeterRegistry
+    meterRegistry: PrometheusMeterRegistry,
+    dialogMessageProcessor: DialogMessageProcessor
 ): Application.() -> Unit {
     return {
         configureMetrics(meterRegistry)
-        configureRoutes(meterRegistry)
+        configureRoutes(meterRegistry, dialogMessageProcessor)
     }
 }
 
