@@ -18,7 +18,8 @@ import no.nav.helsemelding.messagegenerator.util.readFileToString
 import org.apache.kafka.clients.producer.RecordMetadata
 import kotlin.uuid.Uuid
 
-const val ADRESSEREGISTERET_HELSEOPPLYSNINGER_TEST1_HERID = "8142519"
+const val FAGSYSTEM_HERID = "8142519"
+const val EPJ_HERID = "8142520"
 val invalidRecordKeys = listOf(null, "", "1234-abcd")
 
 class DialogMessageProcessor(
@@ -38,7 +39,8 @@ class DialogMessageProcessor(
         val params = mapOf(
             "{genDate}" to nowWithOffset(),
             "{messageId}" to uuid.toString(),
-            "{herId}" to ADRESSEREGISTERET_HELSEOPPLYSNINGER_TEST1_HERID,
+            "{senderHerId}" to FAGSYSTEM_HERID,
+            "{receiverHerId}" to EPJ_HERID,
             "{patientName}" to names.random(),
             "{message}" to messages.random()
         )
