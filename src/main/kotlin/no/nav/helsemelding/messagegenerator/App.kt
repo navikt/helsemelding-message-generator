@@ -8,11 +8,13 @@ import arrow.fx.coroutines.resourceScope
 import arrow.resilience.Schedule
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.ktor.server.application.Application
+import io.ktor.server.engine.logError
 import io.ktor.server.netty.Netty
 import io.ktor.utils.io.CancellationException
 import io.micrometer.prometheus.PrometheusMeterRegistry
 import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.launch
 import no.nav.helsemelding.messagegenerator.plugin.configureMetrics
 import no.nav.helsemelding.messagegenerator.plugin.configureRoutes
 import no.nav.helsemelding.messagegenerator.processor.DialogMessageProcessor
@@ -26,6 +28,7 @@ fun main() = SuspendApp {
     result {
         resourceScope {
             val deps = dependencies()
+            val scope = coroutineScope(coroutineContext)
 
             val dialogMessagePublisher = DialogMessagePublisher(deps.kafkaPublisher)
             val dialogMessageProcessor = DialogMessageProcessor(dialogMessagePublisher)
@@ -39,9 +42,13 @@ fun main() = SuspendApp {
                 module = messageGeneratorModule(deps.meterRegistry, dialogMessageProcessor)
             )
 
-            scheduleProcessDialogMessages(dialogMessageProcessor)
+            scope.launch {
+                scheduleProcessDialogMessages(dialogMessageProcessor)
+            }
 
-            scheduleGeneratingIncomingMessages(incomingMessageProcessor)
+            scope.launch {
+                scheduleGeneratingIncomingMessages(incomingMessageProcessor)
+            }
 
             awaitCancellation()
         }
