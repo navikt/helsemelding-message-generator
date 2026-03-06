@@ -10,6 +10,7 @@ import no.nav.helsemelding.messagegenerator.model.InvalidDialogMessage
 import no.nav.helsemelding.messagegenerator.model.ValidDialogMessage
 import no.nav.helsemelding.messagegenerator.util.nowWithOffset
 import no.nav.helsemelding.messagegenerator.util.readFileToString
+import no.nav.helsemelding.messagegenerator.util.replaceInTemplate
 import kotlin.uuid.Uuid
 
 class DialogMessageProcessorSpec : StringSpec(

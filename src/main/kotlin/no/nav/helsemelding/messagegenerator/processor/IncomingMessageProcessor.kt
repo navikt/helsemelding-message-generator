@@ -10,10 +10,10 @@ import no.nav.helsemelding.ediadapter.model.PostMessageRequest
 import no.nav.helsemelding.messagegenerator.util.nowWithOffset
 import no.nav.helsemelding.messagegenerator.util.readFileToList
 import no.nav.helsemelding.messagegenerator.util.readFileToString
+import no.nav.helsemelding.messagegenerator.util.replaceInTemplate
 import java.util.Base64
 import kotlin.collections.orEmpty
 import kotlin.uuid.Uuid
-import no.nav.helsemelding.messagegenerator.util.replaceInTemplate
 
 private val log = KotlinLogging.logger {}
 private const val BASE64_ENCODING = "base64"

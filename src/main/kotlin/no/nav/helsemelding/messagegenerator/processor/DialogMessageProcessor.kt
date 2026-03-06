@@ -1,6 +1,5 @@
 package no.nav.helsemelding.messagegenerator.processor
 
-import arrow.core.fold
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -15,9 +14,9 @@ import no.nav.helsemelding.messagegenerator.publisher.MessagePublisher
 import no.nav.helsemelding.messagegenerator.util.nowWithOffset
 import no.nav.helsemelding.messagegenerator.util.readFileToList
 import no.nav.helsemelding.messagegenerator.util.readFileToString
+import no.nav.helsemelding.messagegenerator.util.replaceInTemplate
 import org.apache.kafka.clients.producer.RecordMetadata
 import kotlin.uuid.Uuid
-import no.nav.helsemelding.messagegenerator.util.replaceInTemplate
 
 const val FAGSYSTEM_HERID = "8142519"
 const val EPJ_HERID = "8142520"
