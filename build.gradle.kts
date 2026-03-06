@@ -65,6 +65,8 @@ dependencies {
     implementation(libs.kotlin.logging)
     implementation(libs.kotlin.kafka)
     implementation(libs.token.validation.ktor.v3)
+    implementation(libs.edi.adapter.client)
+
     testImplementation(testLibs.bundles.kotest)
     testImplementation(testLibs.kotest.assertions.arrow)
     testImplementation(testLibs.kotest.extensions.jvm)

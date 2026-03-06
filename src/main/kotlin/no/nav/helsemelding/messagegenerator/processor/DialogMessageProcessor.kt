@@ -17,6 +17,7 @@ import no.nav.helsemelding.messagegenerator.util.readFileToList
 import no.nav.helsemelding.messagegenerator.util.readFileToString
 import org.apache.kafka.clients.producer.RecordMetadata
 import kotlin.uuid.Uuid
+import no.nav.helsemelding.messagegenerator.util.replaceInTemplate
 
 const val FAGSYSTEM_HERID = "8142519"
 const val EPJ_HERID = "8142520"
@@ -58,8 +59,3 @@ internal fun nextDialogMessage(xml: String, number: Int): DialogMessage {
         else -> InvalidDialogMessage(invalidRecordKeys.random(), xml)
     }
 }
-
-fun replaceInTemplate(template: String, params: Map<String, String>): String =
-    params.fold(template) { acc, (key, value) ->
-        acc.replace(key, value)
-    }

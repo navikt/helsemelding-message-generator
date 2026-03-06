@@ -16,6 +16,7 @@ import kotlinx.coroutines.currentCoroutineContext
 import no.nav.helsemelding.messagegenerator.plugin.configureMetrics
 import no.nav.helsemelding.messagegenerator.plugin.configureRoutes
 import no.nav.helsemelding.messagegenerator.processor.DialogMessageProcessor
+import no.nav.helsemelding.messagegenerator.processor.IncomingMessageProcessor
 import no.nav.helsemelding.messagegenerator.publisher.DialogMessagePublisher
 import no.nav.helsemelding.messagegenerator.util.coroutineScope
 
@@ -29,6 +30,8 @@ fun main() = SuspendApp {
             val dialogMessagePublisher = DialogMessagePublisher(deps.kafkaPublisher)
             val dialogMessageProcessor = DialogMessageProcessor(dialogMessagePublisher)
 
+            val incomingMessageProcessor = IncomingMessageProcessor(deps.ediAdapterClient)
+
             server(
                 Netty,
                 port = config().server.port.value,
@@ -37,6 +40,8 @@ fun main() = SuspendApp {
             )
 
             scheduleProcessDialogMessages(dialogMessageProcessor)
+
+            scheduleGeneratingIncomingMessages(incomingMessageProcessor)
 
             awaitCancellation()
         }
@@ -63,6 +68,16 @@ private suspend fun ResourceScope.scheduleProcessDialogMessages(processor: Dialo
     Schedule
         .spaced<Unit>(scheduleConfig.interval)
         .repeat { processor.processMessages(scope) }
+}
+
+private suspend fun ResourceScope.scheduleGeneratingIncomingMessages(processor: IncomingMessageProcessor) {
+    if (!config().incomingMessages.enabled) {
+        return
+    }
+
+    Schedule
+        .spaced<Unit>(config().incomingMessages.interval)
+        .repeat { processor.processMessage() }
 }
 
 private fun logError(t: Throwable) = log.error { "Shutdown message-generator due to: ${t.stackTraceToString()}" }
