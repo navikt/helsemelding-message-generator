@@ -82,14 +82,6 @@ class IncomingMessageProcessorSpec : StringSpec(
                 processor.processMessage()
             }
         }
-
-        "processMessage should handle exceptions on sending message to Edi Adapter" {
-            ediAdapterClient.setPostMessageThrowsException(true)
-
-            shouldNotThrowAny {
-                processor.processMessage()
-            }
-        }
     }
 )
 

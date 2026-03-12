@@ -34,21 +34,17 @@ class IncomingMessageProcessor(
 
         val xml = replaceInTemplate(template, params)
 
-        try {
-            ediAdapterClient.postMessage(xml.toPostMessageRequest())
-                .onRight { metadata ->
-                    log.info {
-                        "messageId=$messageId Successfully sent message to EDI Adapter with externalRefId=${metadata.id}"
-                    }
+        ediAdapterClient.postMessage(xml.toPostMessageRequest())
+            .onRight { metadata ->
+                log.info {
+                    "messageId=$messageId Successfully sent message to EDI Adapter with externalRefId=${metadata.id}"
                 }
-                .onLeft { error ->
-                    log.error {
-                        "messageId=$messageId Failed sending message to EDI Adapter: $error"
-                    }
+            }
+            .onLeft { error ->
+                log.error {
+                    "messageId=$messageId Failed sending message to EDI Adapter: $error"
                 }
-        } catch (e: Exception) {
-            log.error(e) { "messageId=$messageId Exception while sending message to EDI Adapter" }
-        }
+            }
     }
 
     private fun String.toPostMessageRequest(): PostMessageRequest = PostMessageRequest(
