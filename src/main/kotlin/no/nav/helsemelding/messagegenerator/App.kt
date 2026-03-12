@@ -18,7 +18,7 @@ import kotlinx.coroutines.launch
 import no.nav.helsemelding.messagegenerator.plugin.configureMetrics
 import no.nav.helsemelding.messagegenerator.plugin.configureRoutes
 import no.nav.helsemelding.messagegenerator.processor.DialogMessageProcessor
-import no.nav.helsemelding.messagegenerator.processor.IncomingMessageProcessor
+import no.nav.helsemelding.messagegenerator.processor.IncomingMessageProducer
 import no.nav.helsemelding.messagegenerator.publisher.DialogMessagePublisher
 import no.nav.helsemelding.messagegenerator.util.coroutineScope
 
@@ -33,7 +33,7 @@ fun main() = SuspendApp {
             val dialogMessagePublisher = DialogMessagePublisher(deps.kafkaPublisher)
             val dialogMessageProcessor = DialogMessageProcessor(dialogMessagePublisher)
 
-            val incomingMessageProcessor = IncomingMessageProcessor(deps.ediAdapterClient)
+            val incomingMessageProducer = IncomingMessageProducer(deps.ediAdapterClient)
 
             server(
                 Netty,
@@ -47,7 +47,7 @@ fun main() = SuspendApp {
             }
 
             scope.launch {
-                scheduleGeneratingIncomingMessages(incomingMessageProcessor)
+                scheduleGeneratingIncomingMessages(incomingMessageProducer)
             }
 
             awaitCancellation()
@@ -77,14 +77,14 @@ private suspend fun ResourceScope.scheduleProcessDialogMessages(processor: Dialo
         .repeat { processor.processMessages(scope) }
 }
 
-private suspend fun ResourceScope.scheduleGeneratingIncomingMessages(processor: IncomingMessageProcessor) {
+private suspend fun ResourceScope.scheduleGeneratingIncomingMessages(producer: IncomingMessageProducer) {
     if (!config().incomingMessages.enabled) {
         return
     }
 
     Schedule
         .spaced<Unit>(config().incomingMessages.interval)
-        .repeat { processor.processMessage() }
+        .repeat { producer.produceIncomingMessage() }
 }
 
 private fun logError(t: Throwable) = log.error { "Shutdown message-generator due to: ${t.stackTraceToString()}" }

@@ -24,7 +24,7 @@ import no.nav.helsemelding.messagegenerator.util.readFileToString
 import java.util.Base64
 import kotlin.uuid.Uuid
 
-class IncomingMessageProcessorSpec : StringSpec(
+class IncomingMessageProducerSpec : StringSpec(
     {
         val template = readFileToString("templates/dialogMessage.xml")!!
 
@@ -32,7 +32,7 @@ class IncomingMessageProcessorSpec : StringSpec(
         val messages = listOf("Dette er en testmelding")
 
         val ediAdapterClient = FakeEdiAdapterClient()
-        val processor = IncomingMessageProcessor(
+        val producer = IncomingMessageProducer(
             ediAdapterClient = ediAdapterClient,
             template = template,
             names = names,
@@ -46,7 +46,7 @@ class IncomingMessageProcessorSpec : StringSpec(
             )
             ediAdapterClient.setPostMessageResponse(Right(metadata))
 
-            processor.processMessage()
+            producer.produceIncomingMessage()
 
             val request = ediAdapterClient.getPostMessageRequest()
             request shouldNotBe null
@@ -79,7 +79,7 @@ class IncomingMessageProcessorSpec : StringSpec(
             )
 
             shouldNotThrowAny {
-                processor.processMessage()
+                producer.produceIncomingMessage()
             }
         }
     }

@@ -15,13 +15,13 @@ import kotlin.uuid.Uuid
 private val log = KotlinLogging.logger {}
 private const val BASE64_ENCODING = "base64"
 
-class IncomingMessageProcessor(
+class IncomingMessageProducer(
     private val ediAdapterClient: EdiAdapterClient,
     private val template: String = readFileToString("templates/dialogMessage.xml") ?: "",
     private val names: List<String> = readFileToList("names.txt").orEmpty(),
     private val messages: List<String> = readFileToList("messages.txt").orEmpty()
 ) {
-    suspend fun processMessage() {
+    suspend fun produceIncomingMessage() {
         val messageId = Uuid.random().toString()
         val params = mapOf(
             "{genDate}" to nowWithOffset(),
