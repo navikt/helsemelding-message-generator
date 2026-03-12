@@ -9,6 +9,17 @@ the following files:
 - `messages.txt`
 - `names.txt`
 
+## Types of dialog messages published
+
+To determine what kind of dialog message is published, a random number between 1 and 11 is generated which then 
+corresponds to one the following messages:
+
+| Outcome                               | Trigger condition  | Description                                              |
+|---------------------------------------|--------------------|----------------------------------------------------------|
+| Single valid dialog message           | number between 1–9 | A valid message                                          |
+| Single invalid dialog message         | number = 10        | Invalid **record key**: (`null`, `""`, or `"1234-abcd"`) |
+| Two valid dialog messages (duplicate) | number = 11        | Same **record key** used twice                           |
+
 ## Dialog message documentation
 
 Documentation for initial request and follow-up request can be found [here](https://sarepta.helsedir.no/standard/Dialogmelding/1.0;profile=1). 

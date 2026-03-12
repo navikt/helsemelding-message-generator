@@ -2,7 +2,10 @@ package no.nav.helsemelding.messagegenerator.processor
 
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.inspectors.forAll
+import io.kotest.inspectors.forSingle
 import io.kotest.matchers.collections.shouldBeOneOf
+import io.kotest.matchers.collections.shouldHaveSize
+import io.kotest.matchers.equality.shouldBeEqualUsingFields
 import io.kotest.matchers.string.shouldContain
 import io.kotest.matchers.string.shouldNotContain
 import io.kotest.matchers.types.shouldBeInstanceOf
@@ -60,13 +63,25 @@ class DialogMessageProcessorSpec : StringSpec(
 
         "Number 1 through 9 should create a valid dialog message" {
             (1..9).toList().forAll { number ->
-                nextDialogMessage(xml, number).shouldBeInstanceOf<ValidDialogMessage>()
+                nextDialogMessage(xml, number).forSingle { dialogMessage ->
+                    dialogMessage.shouldBeInstanceOf<ValidDialogMessage>()
+                }
             }
         }
 
         "Number 10 should create an invalid dialog message" {
-            val invalidDialogMessage = nextDialogMessage(xml, 10).shouldBeInstanceOf<InvalidDialogMessage>()
-            invalidDialogMessage.id.shouldBeOneOf(null, "", "1234-abcd")
+            nextDialogMessage(xml, 10).forSingle { invalidDialogMessage ->
+                invalidDialogMessage.shouldBeInstanceOf<InvalidDialogMessage>()
+                invalidDialogMessage.id.shouldBeOneOf(null, "", "1234-abcd")
+            }
+        }
+
+        "Number 11 should create two dialog messages with the same uuid" {
+            val dialogMessages = nextDialogMessage(xml, 11).shouldHaveSize(2)
+
+            val firstMessage = dialogMessages.elementAt(0).shouldBeInstanceOf<ValidDialogMessage>()
+            val secondMessage = dialogMessages.elementAt(1).shouldBeInstanceOf<ValidDialogMessage>()
+            firstMessage shouldBeEqualUsingFields secondMessage
         }
     }
 )

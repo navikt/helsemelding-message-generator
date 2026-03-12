@@ -3,7 +3,7 @@ package no.nav.helsemelding.messagegenerator.processor
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -45,16 +45,18 @@ class DialogMessageProcessor(
             "{message}" to messages.random()
         )
         val xml = replaceInTemplate(template, params)
-        return flowOf(nextDialogMessage(xml, (1..10).random()))
+        return nextDialogMessage(xml, (1..11).random()).asFlow()
     }
 
     private suspend fun publishDialogMessage(dialogMessage: DialogMessage): Result<RecordMetadata> =
         messagePublisher.publish(dialogMessage.id, dialogMessage.xml)
 }
 
-internal fun nextDialogMessage(xml: String, number: Int): DialogMessage {
+internal fun nextDialogMessage(xml: String, number: Int): List<DialogMessage> {
+    val uuid = Uuid.random()
     return when (number) {
-        in 1..9 -> ValidDialogMessage(Uuid.random(), xml)
-        else -> InvalidDialogMessage(invalidRecordKeys.random(), xml)
+        in 1..9 -> listOf(ValidDialogMessage(uuid, xml))
+        10 -> listOf(InvalidDialogMessage(invalidRecordKeys.random(), xml))
+        else -> List(2) { ValidDialogMessage(uuid, xml) }
     }
 }
