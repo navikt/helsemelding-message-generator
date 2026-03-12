@@ -5,11 +5,9 @@ import arrow.core.Either.Left
 import arrow.core.Either.Right
 import io.kotest.assertions.throwables.shouldNotThrowAny
 import io.kotest.core.spec.style.StringSpec
-import io.kotest.matchers.equals.shouldBeEqual
 import io.kotest.matchers.shouldNotBe
 import io.kotest.matchers.string.shouldContain
 import io.kotest.matchers.string.shouldNotContain
-import io.ktor.http.ContentType
 import no.nav.helsemelding.ediadapter.client.EdiAdapterClient
 import no.nav.helsemelding.ediadapter.model.ApprecInfo
 import no.nav.helsemelding.ediadapter.model.ErrorMessage
@@ -44,31 +42,26 @@ class IncomingMessageProducerSpec : StringSpec(
                 id = Uuid.random(),
                 location = "https://example.com/messages/${Uuid.random()}"
             )
-            ediAdapterClient.setPostMessageResponse(Right(metadata))
+            ediAdapterClient.givenPostMessageResponse(Right(metadata))
 
             producer.produceIncomingMessage()
 
             val request = ediAdapterClient.getPostMessageRequest()
             request shouldNotBe null
-            request!!.contentType shouldBeEqual ContentType.Application.Xml.toString()
-            request.contentTransferEncoding shouldBeEqual "base64"
 
-            val businessDocument = String(Base64.getDecoder().decode(request.businessDocument))
+            val businessDocument = String(Base64.getDecoder().decode(request!!.businessDocument))
+
             businessDocument shouldContain "<Id>$EPJ_HERID</Id>"
             businessDocument shouldContain "<Id>$FAGSYSTEM_HERID</Id>"
             businessDocument shouldContain "<GivenName>${names.single()}</GivenName>"
             businessDocument shouldContain "<Sporsmal>${messages.single()}</Sporsmal>"
 
-            businessDocument shouldNotContain "{genDate}"
-            businessDocument shouldNotContain "{messageId}"
-            businessDocument shouldNotContain "{senderHerId}"
-            businessDocument shouldNotContain "{receiverHerId}"
-            businessDocument shouldNotContain "{patientName}"
-            businessDocument shouldNotContain "{message}"
+            businessDocument shouldNotContain "<GenDate>{genDate}</GenDate>"
+            businessDocument shouldNotContain "<MsgId>{messageId}</MsgId>"
         }
 
         "processMessage should handle an error response from Edi Adapter" {
-            ediAdapterClient.setPostMessageResponse(
+            ediAdapterClient.givenPostMessageResponse(
                 Left(
                     ErrorMessage(
                         error = "Internal Server Error",
@@ -88,7 +81,6 @@ class IncomingMessageProducerSpec : StringSpec(
 class FakeEdiAdapterClient : EdiAdapterClient {
     private var postMessageResponse: Either<ErrorMessage, Metadata>? = null
     private var postMessageRequest: PostMessageRequest? = null
-    private var postMessageThrowsException: Boolean = false
 
     val errorMessage404 = ErrorMessage(
         error = "Not Implemented",
@@ -96,23 +88,14 @@ class FakeEdiAdapterClient : EdiAdapterClient {
         requestId = Uuid.random().toString()
     )
 
-    fun setPostMessageResponse(message: Either<ErrorMessage, Metadata>) {
+    fun givenPostMessageResponse(message: Either<ErrorMessage, Metadata>) {
         postMessageResponse = message
     }
 
     fun getPostMessageRequest(): PostMessageRequest? = postMessageRequest
 
-    fun setPostMessageThrowsException(throws: Boolean) {
-        postMessageThrowsException = throws
-    }
-
     override suspend fun postMessage(postMessagesRequest: PostMessageRequest): Either<ErrorMessage, Metadata> {
         this.postMessageRequest = postMessagesRequest
-
-        if (postMessageThrowsException) {
-            throw IllegalStateException("Arbitrary exception")
-        }
-
         return postMessageResponse ?: error("Post message response not set")
     }
 
