@@ -1,6 +1,5 @@
 package no.nav.helsemelding.messagegenerator.processor
 
-import arrow.core.fold
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -15,6 +14,7 @@ import no.nav.helsemelding.messagegenerator.publisher.MessagePublisher
 import no.nav.helsemelding.messagegenerator.util.nowWithOffset
 import no.nav.helsemelding.messagegenerator.util.readFileToList
 import no.nav.helsemelding.messagegenerator.util.readFileToString
+import no.nav.helsemelding.messagegenerator.util.replaceInTemplate
 import org.apache.kafka.clients.producer.RecordMetadata
 import kotlin.uuid.Uuid
 
@@ -58,8 +58,3 @@ internal fun nextDialogMessage(xml: String, number: Int): DialogMessage {
         else -> InvalidDialogMessage(invalidRecordKeys.random(), xml)
     }
 }
-
-fun replaceInTemplate(template: String, params: Map<String, String>): String =
-    params.fold(template) { acc, (key, value) ->
-        acc.replace(key, value)
-    }

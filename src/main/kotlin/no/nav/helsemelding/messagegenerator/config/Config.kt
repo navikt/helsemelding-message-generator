@@ -9,7 +9,9 @@ import kotlin.time.Duration
 
 data class Config(
     val server: Server,
-    val kafka: Kafka
+    val kafka: Kafka,
+    val ediAdapter: EdiAdapter,
+    val incomingMessages: IncomingMessages
 )
 
 data class Server(
@@ -82,5 +84,17 @@ data class DialogMessage(
     val interval: Duration
 )
 
+data class EdiAdapter(
+    val scope: Scope
+)
+
+data class IncomingMessages(
+    val enabled: Boolean,
+    val interval: Duration
+)
+
 @JvmInline
 value class Port(val value: Int)
+
+@JvmInline
+value class Scope(val value: String)

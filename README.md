@@ -19,6 +19,13 @@ To read more about other types of messages see [Samhandling i pasientforløp](ht
 Example of an initial request can be found [here](https://git.sarepta.ehelse.no/publisert/standarder/raw/master/eksempel/Dialogmelding/Dialogmelding-v1-0/Dialogmelding_foresporsel_PLO_v1-0.xml)
 which is the basis for `dialogMessage.xml`.
 
+## Incoming messages
+
+Incoming messages are messages that EPJ sends to NAV.
+In order to test the incoming message flow, the application also produces incoming messages.
+The application produces incoming messages based on the `dialogMessage.xml` template. The difference between the outgoing and incoming messages is that HER-id of the receiver and sender are swapped.
+Incoming messages are sent to NHN using EDI Adapter.
+
 ## Local development
 
 Running the application locally:
