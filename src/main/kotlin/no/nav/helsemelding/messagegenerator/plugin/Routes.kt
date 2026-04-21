@@ -1,5 +1,6 @@
 package no.nav.helsemelding.messagegenerator.plugin
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import io.ktor.server.application.Application
 import io.ktor.server.response.respond
 import io.ktor.server.response.respondText
@@ -14,6 +15,8 @@ import kotlinx.coroutines.delay
 import no.nav.helsemelding.messagegenerator.processor.DialogMessageProcessor
 import no.nav.helsemelding.messagegenerator.scheduler.SchedulerService
 import kotlin.time.Duration.Companion.seconds
+
+private val log = KotlinLogging.logger {}
 
 fun Application.configureRoutes(
     registry: PrometheusMeterRegistry,
@@ -62,14 +65,19 @@ fun Route.externalRoutes(
 
     route("/scheduler") {
         get("/status") {
-            val dialogStatus = schedulerService.dialogMessages.status()
-            val incomingStatus = schedulerService.incomingMessages.status()
-            call.respond(
-                mapOf(
-                    "dialogMessages" to dialogStatus,
-                    "incomingMessages" to incomingStatus
+            try {
+                val dialogStatus = schedulerService.dialogMessages.status()
+                val incomingStatus = schedulerService.incomingMessages.status()
+                call.respond(
+                    mapOf(
+                        "dialogMessages" to dialogStatus,
+                        "incomingMessages" to incomingStatus
+                    )
                 )
-            )
+            } catch (e: Exception) {
+                log.error(e) { "Failed to get scheduler status" }
+                throw e
+            }
         }
 
         route("/dialog-messages") {
