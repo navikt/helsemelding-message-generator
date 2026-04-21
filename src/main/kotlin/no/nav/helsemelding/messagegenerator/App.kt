@@ -14,12 +14,12 @@ import io.ktor.utils.io.CancellationException
 import io.micrometer.prometheus.PrometheusMeterRegistry
 import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.currentCoroutineContext
-import kotlinx.coroutines.launch
 import no.nav.helsemelding.messagegenerator.plugin.configureMetrics
 import no.nav.helsemelding.messagegenerator.plugin.configureRoutes
 import no.nav.helsemelding.messagegenerator.processor.DialogMessageProcessor
 import no.nav.helsemelding.messagegenerator.processor.IncomingMessageProducer
 import no.nav.helsemelding.messagegenerator.publisher.DialogMessagePublisher
+import no.nav.helsemelding.messagegenerator.scheduler.SchedulerService
 import no.nav.helsemelding.messagegenerator.util.coroutineScope
 
 private val log = KotlinLogging.logger {}
@@ -35,20 +35,25 @@ fun main() = SuspendApp {
 
             val incomingMessageProducer = IncomingMessageProducer(deps.ediAdapterClient)
 
+            val schedulerService = SchedulerService(
+                scope = scope,
+                config = config(),
+                dialogMessageProcessor = dialogMessageProcessor,
+                incomingMessageProducer = incomingMessageProducer
+            )
+
             server(
                 Netty,
                 port = config().server.port.value,
                 preWait = config().server.preWait,
-                module = messageGeneratorModule(deps.meterRegistry, dialogMessageProcessor)
+                module = messageGeneratorModule(
+                    deps.meterRegistry,
+                    dialogMessageProcessor,
+                    schedulerService
+                )
             )
 
-            scope.launch {
-                scheduleProcessDialogMessages(dialogMessageProcessor)
-            }
-
-            scope.launch {
-                scheduleGeneratingIncomingMessages(incomingMessageProducer)
-            }
+            schedulerService.init()
 
             awaitCancellation()
         }
@@ -58,11 +63,12 @@ fun main() = SuspendApp {
 
 internal fun messageGeneratorModule(
     meterRegistry: PrometheusMeterRegistry,
-    dialogMessageProcessor: DialogMessageProcessor
+    dialogMessageProcessor: DialogMessageProcessor,
+    schedulerService: SchedulerService
 ): Application.() -> Unit {
     return {
         configureMetrics(meterRegistry)
-        configureRoutes(meterRegistry, dialogMessageProcessor)
+        configureRoutes(meterRegistry, dialogMessageProcessor, schedulerService)
     }
 }
 
