@@ -1,8 +1,8 @@
 package no.nav.helsemelding.messagegenerator.model
 
 import kotlinx.datetime.Instant
-import kotlin.time.Duration
 import kotlinx.serialization.Serializable
+import kotlin.time.Duration
 
 @Serializable
 data class SchedulerStatus(
