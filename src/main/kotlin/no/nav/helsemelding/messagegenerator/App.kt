@@ -14,6 +14,7 @@ import io.ktor.utils.io.CancellationException
 import io.micrometer.prometheus.PrometheusMeterRegistry
 import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.currentCoroutineContext
+import no.nav.helsemelding.messagegenerator.plugin.configureContentNegotiation
 import no.nav.helsemelding.messagegenerator.plugin.configureMetrics
 import no.nav.helsemelding.messagegenerator.plugin.configureRoutes
 import no.nav.helsemelding.messagegenerator.processor.DialogMessageProcessor
@@ -68,6 +69,7 @@ internal fun messageGeneratorModule(
 ): Application.() -> Unit {
     return {
         configureMetrics(meterRegistry)
+        configureContentNegotiation()
         configureRoutes(meterRegistry, dialogMessageProcessor, schedulerService)
     }
 }
