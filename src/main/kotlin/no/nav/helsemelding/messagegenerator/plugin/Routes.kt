@@ -1,6 +1,7 @@
 package no.nav.helsemelding.messagegenerator.plugin
 
 import io.github.oshai.kotlinlogging.KotlinLogging
+import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.Application
 import io.ktor.server.response.respond
 import io.ktor.server.response.respondText
@@ -94,7 +95,7 @@ fun Route.externalRoutes(
             post("/interval/{intervalSeconds}") {
                 val intervalSeconds = call.parameters["intervalSeconds"]?.toLongOrNull()
                 if (intervalSeconds == null || intervalSeconds <= 0) {
-                    call.respondText("Invalid interval. Please provide a positive number of seconds.")
+                    call.respondText("Invalid interval. Please provide a positive number of seconds.", status = HttpStatusCode.BadRequest)
                     return@post
                 }
 
@@ -118,7 +119,7 @@ fun Route.externalRoutes(
             post("/interval/{intervalSeconds}") {
                 val intervalSeconds = call.parameters["intervalSeconds"]?.toLongOrNull()
                 if (intervalSeconds == null || intervalSeconds <= 0) {
-                    call.respondText("Invalid interval. Please provide a positive number of seconds.")
+                    call.respondText("Invalid interval. Please provide a positive number of seconds.", status = HttpStatusCode.BadRequest)
                     return@post
                 }
 
