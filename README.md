@@ -65,3 +65,96 @@ to use `FakeDialogMessagePublisher` instead:
 ```kotlin
 val dialogMessageProcessor = DialogMessageProcessor(FakeDialogMessagePublisher())
 ```
+
+## Dynamic scheduler configuration 
+
+The service exposes endpoints for dynamic configuration of the scheduler:
+
+#### Get scheduler status
+
+`GET /scheduler/status`
+
+Returns the current state of all schedulers.
+
+Example request:
+```
+curl https://<host>/scheduler/status
+```
+
+Example response:
+```
+{
+    "dialogMessages": {
+        "enabled": true,
+        "interval": "PT3M",
+        "lastRunAt": "2026-04-24T10:15:00Z"
+    },
+    "incomingMessages": {
+        "enabled": true,
+        "interval": "PT4M",
+        "lastRunAt": "2026-04-24T10:14:30Z"
+    }
+}
+```
+
+#### Stop dialog message scheduler
+
+`POST /scheduler/dialog-messages/stop`
+
+Disables generation of dialog messages.
+
+```
+curl -X POST https://<host>/scheduler/dialog-messages/stop
+```
+
+#### Start dialog message scheduler
+
+`POST /scheduler/dialog-messages/start`
+
+Enables generation of dialog messages.
+
+```
+curl -X POST https://<host>/scheduler/dialog-messages/start
+```
+
+#### Update dialog message interval
+
+`POST /scheduler/dialog-messages/interval/{seconds}`
+
+Updates the interval between generations of dialog messages. 
+`{seconds}` must be a positive integer
+
+```
+curl -X POST https://<host>/scheduler/dialog-messages/interval/300
+```
+
+#### Stop incoming message scheduler
+
+`POST /scheduler/incoming-messages/stop`
+
+Disables generation of incoming messages.
+
+```
+curl -X POST https://<host>/scheduler/incoming-messages/stop
+```
+
+#### Start incoming message scheduler
+
+`POST /scheduler/incoming-messages/start`
+
+Enables generation of incoming messages.
+
+```
+curl -X POST https://<host>/scheduler/incoming-messages/start
+```
+
+#### Update incoming message interval
+
+`POST /scheduler/incoming-messages/interval/{seconds}`
+
+Updates the interval between generations of incoming messages. 
+`{seconds}` must be a positive integer
+
+```
+curl -X POST https://<host>/scheduler/incoming-messages/interval/30
+```
