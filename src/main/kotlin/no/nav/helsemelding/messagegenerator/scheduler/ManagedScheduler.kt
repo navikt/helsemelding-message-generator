@@ -46,9 +46,8 @@ class ManagedScheduler(
                     mutex.withLock {
                         lastRunAt = Clock.System.now()
                     }
-                } catch (e: CancellationException) {
-                    throw e
                 } catch (e: Throwable) {
+                    if (e is CancellationException) throw e
                     log.error(e) { "Scheduled action failed for '$name'" }
                 }
 
