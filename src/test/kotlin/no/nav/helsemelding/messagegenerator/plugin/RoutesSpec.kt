@@ -2,7 +2,6 @@ package no.nav.helsemelding.messagegenerator.plugin
 
 import com.sksamuel.hoplite.Masked
 import io.kotest.core.spec.style.StringSpec
-import io.kotest.datatest.withData
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import io.ktor.client.HttpClient
@@ -60,91 +59,89 @@ class RoutesSpec : StringSpec({
         }
     }
 
-    // /scheduler/dialog-messages/stop endpoint disables scheduler
-    // /scheduler/incoming-messages/stop endpoint disables scheduler
-    withData(
-        nameFn = { (stopEndpoint) -> "$stopEndpoint endpoint disables scheduler" },
-        listOf(
-            listOf("/scheduler/dialog-messages/stop", "dialogMessages"),
-            listOf("/scheduler/incoming-messages/stop", "incomingMessages")
-        )
-    ) { (stopEndpoint, schedulerKey) ->
+    "/stop endpoints disable schedulers" {
         routesTestApplication { client ->
-            client.post(stopEndpoint)
+            val testCases = listOf(
+                listOf("/scheduler/dialog-messages/stop", "dialogMessages"),
+                listOf("/scheduler/incoming-messages/stop", "incomingMessages")
+            )
 
-            val response = client.get("/scheduler/status") {
-                accept(ContentType.Application.Json)
+            testCases.forEach { (stopEndpoint, schedulerKey) ->
+                client.post(stopEndpoint)
+
+                val response = client.get("/scheduler/status") {
+                    accept(ContentType.Application.Json)
+                }
+
+                response.status shouldBe HttpStatusCode.OK
+
+                val statusResponse = response.body<Map<String, SchedulerStatus>>()
+                statusResponse[schedulerKey] shouldNotBe null
+                statusResponse[schedulerKey]?.enabled shouldBe false
             }
-
-            response.status shouldBe HttpStatusCode.OK
-
-            val statusResponse = response.body<Map<String, SchedulerStatus>>()
-            statusResponse[schedulerKey] shouldNotBe null
-            statusResponse[schedulerKey]?.enabled shouldBe false
         }
     }
 
-    // /scheduler/dialog-messages/start endpoint enables scheduler
-    // /scheduler/incoming-messages/start endpoint enables scheduler
-    withData(
-        nameFn = { (startEndpoint) -> "$startEndpoint endpoint enables scheduler" },
-        listOf(
-            listOf("/scheduler/dialog-messages/start", "dialogMessages"),
-            listOf("/scheduler/incoming-messages/start", "incomingMessages")
-        )
-    ) { (startEndpoint, schedulerKey) ->
+    "/start endpoints enable schedulers" {
         routesTestApplication(enableSchedulers = false) { client ->
-            client.post(startEndpoint)
+            val testCases = listOf(
+                listOf("/scheduler/dialog-messages/start", "dialogMessages"),
+                listOf("/scheduler/incoming-messages/start", "incomingMessages")
+            )
 
-            val response = client.get("/scheduler/status") {
-                accept(ContentType.Application.Json)
+            testCases.forEach { (startEndpoint, schedulerKey) ->
+                client.post(startEndpoint)
+
+                val response = client.get("/scheduler/status") {
+                    accept(ContentType.Application.Json)
+                }
+
+                response.status shouldBe HttpStatusCode.OK
+
+                val statusResponse = response.body<Map<String, SchedulerStatus>>()
+                statusResponse[schedulerKey] shouldNotBe null
+                statusResponse[schedulerKey]?.enabled shouldBe true
             }
-
-            response.status shouldBe HttpStatusCode.OK
-
-            val statusResponse = response.body<Map<String, SchedulerStatus>>()
-            statusResponse[schedulerKey] shouldNotBe null
-            statusResponse[schedulerKey]?.enabled shouldBe true
         }
     }
 
-    // /scheduler/dialog-messages/interval endpoint changes interval for scheduler
-    // /scheduler/incoming-messages/interval endpoint changes interval for scheduler
-    withData(
-        nameFn = { (intervalEndpoint) -> "$intervalEndpoint endpoint changes interval for scheduler" },
-        listOf(
-            listOf("/scheduler/dialog-messages/interval", "dialogMessages"),
-            listOf("/scheduler/incoming-messages/interval", "incomingMessages")
-        )
-    ) { (intervalEndpoint, schedulerKey) ->
-        routesTestApplication(enableSchedulers = false) { client ->
-            client.post("$intervalEndpoint/600")
+    "/interval/{intervalSeconds} endpoint changes interval for scheduler" {
+        routesTestApplication { client ->
+            val testCases = listOf(
+                listOf("/scheduler/dialog-messages/interval", "dialogMessages"),
+                listOf("/scheduler/incoming-messages/interval", "incomingMessages")
+            )
 
-            val response = client.get("/scheduler/status") {
-                accept(ContentType.Application.Json)
+            testCases.forEach { (intervalEndpoint, schedulerKey) ->
+                client.post("$intervalEndpoint/600")
+
+                val response = client.get("/scheduler/status") {
+                    accept(ContentType.Application.Json)
+                }
+
+                val statusResponse = response.body<Map<String, SchedulerStatus>>()
+                statusResponse[schedulerKey] shouldNotBe null
+                statusResponse[schedulerKey]?.enabled shouldBe true
+                statusResponse[schedulerKey]?.interval shouldBe 10.minutes
             }
-
-            val statusResponse = response.body<Map<String, SchedulerStatus>>()
-            statusResponse[schedulerKey] shouldNotBe null
-            statusResponse[schedulerKey]?.enabled shouldBe true
-            statusResponse[schedulerKey]?.interval shouldBe 10.minutes
         }
     }
 
-    // /scheduler/dialog-messages/interval endpoint rejects non-positive values
-    // /scheduler/incoming-messages/interval endpoint rejects non-positive values
-    withData(
-        nameFn = { (intervalEndpoint) -> "$intervalEndpoint endpoint rejects non-positive values" },
-        listOf(
-            listOf("/scheduler/dialog-messages/interval"),
-            listOf("/scheduler/incoming-messages/interval")
-        )
-    ) { (intervalEndpoint) ->
-        routesTestApplication(enableSchedulers = false) { client ->
-            val response = client.post("$intervalEndpoint/0")
+    "/interval/{intervalSeconds} endpoint rejects non-positive values" {
+        routesTestApplication { client ->
+            val testCases = listOf(
+                listOf("/scheduler/dialog-messages/interval", 0),
+                listOf("/scheduler/dialog-messages/interval", -60),
+                listOf("/scheduler/incoming-messages/interval", 0),
+                listOf("/scheduler/incoming-messages/interval", -60)
+            )
 
-            response.status shouldBe HttpStatusCode.BadRequest
-            response.bodyAsText() shouldBe "Invalid interval. Please provide a positive number of seconds."
+            testCases.forEach { (intervalEndpoint, intervalSeconds) ->
+                val response = client.post("$intervalEndpoint/$intervalSeconds")
+
+                response.status shouldBe HttpStatusCode.BadRequest
+                response.bodyAsText() shouldBe "Invalid interval. Please provide a positive number of seconds."
+            }
         }
     }
 })
