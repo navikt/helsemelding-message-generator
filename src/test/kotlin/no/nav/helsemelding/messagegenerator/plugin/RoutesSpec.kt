@@ -2,8 +2,8 @@ package no.nav.helsemelding.messagegenerator.plugin
 
 import com.sksamuel.hoplite.Masked
 import io.kotest.core.spec.style.StringSpec
+import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
-import io.kotest.matchers.shouldNotBe
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
@@ -49,13 +49,15 @@ class RoutesSpec : StringSpec({
 
             val statusResponse = response.body<Map<String, SchedulerStatus>>()
 
-            statusResponse["dialogMessages"] shouldNotBe null
-            statusResponse["dialogMessages"]?.enabled shouldBe true
-            statusResponse["dialogMessages"]?.interval shouldBe 3.minutes
+            val dialogMessageScheduler = statusResponse["dialogMessages"]
+            dialogMessageScheduler.shouldNotBeNull()
+            dialogMessageScheduler.enabled shouldBe true
+            dialogMessageScheduler.interval shouldBe 3.minutes
 
-            statusResponse["incomingMessages"] shouldNotBe null
-            statusResponse["incomingMessages"]?.enabled shouldBe true
-            statusResponse["incomingMessages"]?.interval shouldBe 4.minutes
+            val incomingMessagesScheduler = statusResponse["incomingMessages"]
+            incomingMessagesScheduler.shouldNotBeNull()
+            incomingMessagesScheduler.enabled shouldBe true
+            incomingMessagesScheduler.interval shouldBe 4.minutes
         }
     }
 
@@ -76,8 +78,10 @@ class RoutesSpec : StringSpec({
                 response.status shouldBe HttpStatusCode.OK
 
                 val statusResponse = response.body<Map<String, SchedulerStatus>>()
-                statusResponse[schedulerKey] shouldNotBe null
-                statusResponse[schedulerKey]?.enabled shouldBe false
+
+                val scheduler = statusResponse[schedulerKey]
+                scheduler.shouldNotBeNull()
+                scheduler.enabled shouldBe false
             }
         }
     }
@@ -99,8 +103,10 @@ class RoutesSpec : StringSpec({
                 response.status shouldBe HttpStatusCode.OK
 
                 val statusResponse = response.body<Map<String, SchedulerStatus>>()
-                statusResponse[schedulerKey] shouldNotBe null
-                statusResponse[schedulerKey]?.enabled shouldBe true
+
+                val scheduler = statusResponse[schedulerKey]
+                scheduler.shouldNotBeNull()
+                scheduler.enabled shouldBe true
             }
         }
     }
@@ -120,9 +126,11 @@ class RoutesSpec : StringSpec({
                 }
 
                 val statusResponse = response.body<Map<String, SchedulerStatus>>()
-                statusResponse[schedulerKey] shouldNotBe null
-                statusResponse[schedulerKey]?.enabled shouldBe true
-                statusResponse[schedulerKey]?.interval shouldBe 10.minutes
+
+                val scheduler = statusResponse[schedulerKey]
+                scheduler.shouldNotBeNull()
+                scheduler.enabled shouldBe true
+                scheduler.interval shouldBe 10.minutes
             }
         }
     }
