@@ -75,6 +75,37 @@ class IncomingMessageProducerSpec : StringSpec(
                 producer.produceIncomingMessage()
             }
         }
+
+        "processMessage should send XML with attachments" {
+            val metadata = Metadata(
+                id = Uuid.random(),
+                location = "https://example.com/messages/${Uuid.random()}"
+            )
+
+            ediAdapterClient.givenPostMessageResponse(Right(metadata))
+
+            val producerWithAttachments = IncomingMessageProducer(
+                ediAdapterClient = ediAdapterClient,
+                template = template,
+                names = names,
+                messages = messages
+            )
+
+            producerWithAttachments.produceIncomingMessage(
+                addAttachments = true,
+                attachmentsCount = 2
+            )
+
+            val request = ediAdapterClient.getPostMessageRequest()
+            request shouldNotBe null
+
+            val businessDocument = String(Base64.getDecoder().decode(request!!.businessDocument))
+
+            businessDocument shouldContain "<Base64Container"
+            businessDocument shouldContain "<MimeType>application/pdf</MimeType>"
+            businessDocument shouldContain "<Description>Testvedlegg 1</Description>"
+            businessDocument shouldContain "<Description>Testvedlegg 2</Description>"
+        }
     }
 )
 
