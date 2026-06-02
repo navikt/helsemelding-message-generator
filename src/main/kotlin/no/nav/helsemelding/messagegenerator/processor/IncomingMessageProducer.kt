@@ -10,6 +10,7 @@ import no.nav.helsemelding.messagegenerator.util.readFileToString
 import no.nav.helsemelding.messagegenerator.util.replaceInTemplate
 import java.util.Base64
 import kotlin.collections.orEmpty
+import kotlin.random.Random
 import kotlin.uuid.Uuid
 
 private val log = KotlinLogging.logger {}
@@ -18,10 +19,14 @@ private const val BASE64_ENCODING = "base64"
 class IncomingMessageProducer(
     private val ediAdapterClient: EdiAdapterClient,
     private val template: String = readFileToString("templates/dialogMessage.xml") ?: "",
+    private val attachmentTemplate: String = readFileToString("templates/attachment.xml") ?: "",
     private val names: List<String> = readFileToList("names.txt").orEmpty(),
     private val messages: List<String> = readFileToList("messages.txt").orEmpty()
 ) {
-    suspend fun produceIncomingMessage() {
+    suspend fun produceIncomingMessage(
+        addAttachments: Boolean = addAttachmentsRandomly(),
+        attachmentsCount: Int = Random.nextInt(1, 4)
+    ) {
         val messageId = Uuid.random().toString()
         val params = mapOf(
             "{genDate}" to nowWithOffset(),
@@ -29,7 +34,8 @@ class IncomingMessageProducer(
             "{senderHerId}" to EPJ_HERID,
             "{receiverHerId}" to FAGSYSTEM_HERID,
             "{patientName}" to names.random(),
-            "{message}" to messages.random()
+            "{message}" to messages.random(),
+            "{attachments}" to createAttachmentsXml(addAttachments, attachmentsCount)
         )
 
         val xml = replaceInTemplate(template, params)
@@ -52,4 +58,28 @@ class IncomingMessageProducer(
         contentType = ContentType.Application.Xml.toString(),
         contentTransferEncoding = BASE64_ENCODING
     )
+
+    private fun createAttachmentsXml(
+        addAttachments: Boolean,
+        attachmentsCount: Int
+    ): String {
+        if (!addAttachments) {
+            return ""
+        }
+
+        return (1..attachmentsCount)
+            .joinToString(separator = "\n") { index ->
+                createAttachmentXml(index)
+            }
+    }
+
+    private fun createAttachmentXml(index: Int): String {
+        val params = mapOf(
+            "{index}" to index.toString()
+        )
+
+        return replaceInTemplate(attachmentTemplate, params)
+    }
+
+    private fun addAttachmentsRandomly() = Random.nextInt(0, 2) == 1
 }

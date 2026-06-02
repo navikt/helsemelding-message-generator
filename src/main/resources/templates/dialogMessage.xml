@@ -80,4 +80,5 @@
             </Content>
         </RefDoc>
     </Document>
+    {attachments}
 </MsgHead>
