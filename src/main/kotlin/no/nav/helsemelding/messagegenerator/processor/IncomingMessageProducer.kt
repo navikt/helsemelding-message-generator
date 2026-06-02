@@ -81,5 +81,5 @@ class IncomingMessageProducer(
         return replaceInTemplate(attachmentTemplate, params)
     }
 
-    private fun addAttachmentsRandomly() = Random.nextInt(0, 10) < 5
+    private fun addAttachmentsRandomly() = Random.nextInt(0, 2) == 1
 }
