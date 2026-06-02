@@ -84,14 +84,7 @@ class IncomingMessageProducerSpec : StringSpec(
 
             ediAdapterClient.givenPostMessageResponse(Right(metadata))
 
-            val producerWithAttachments = IncomingMessageProducer(
-                ediAdapterClient = ediAdapterClient,
-                template = template,
-                names = names,
-                messages = messages
-            )
-
-            producerWithAttachments.produceIncomingMessage(
+            producer.produceIncomingMessage(
                 addAttachments = true,
                 attachmentsCount = 2
             )
@@ -115,14 +108,7 @@ class IncomingMessageProducerSpec : StringSpec(
 
             ediAdapterClient.givenPostMessageResponse(Right(metadata))
 
-            val producerWithAttachments = IncomingMessageProducer(
-                ediAdapterClient = ediAdapterClient,
-                template = template,
-                names = names,
-                messages = messages
-            )
-
-            producerWithAttachments.produceIncomingMessage(
+            producer.produceIncomingMessage(
                 addAttachments = false
             )
 
