@@ -69,10 +69,13 @@ fun Route.externalRoutes(
             try {
                 val dialogStatus = schedulerService.dialogMessages.status()
                 val incomingStatus = schedulerService.incomingMessages.status()
+                val edi1Status = schedulerService.edi1Messages.status()
+
                 call.respond(
                     mapOf(
                         "dialogMessages" to dialogStatus,
-                        "incomingMessages" to incomingStatus
+                        "incomingMessages" to incomingStatus,
+                        "edi1Messages" to edi1Status
                     )
                 )
             } catch (e: Exception) {
@@ -126,6 +129,33 @@ fun Route.externalRoutes(
                 schedulerService.incomingMessages.updateInterval(intervalSeconds.seconds)
 
                 call.respondText("Incoming messages scheduler interval updated to $intervalSeconds seconds.")
+            }
+        }
+
+        route("/edi1-messages") {
+            post("/start") {
+                schedulerService.edi1Messages.start()
+                call.respondText("EDI 1 messages scheduler started.")
+            }
+
+            post("/stop") {
+                schedulerService.edi1Messages.stop()
+                call.respondText("EDI 1 messages scheduler stopped.")
+            }
+
+            post("/interval/{intervalSeconds}") {
+                val intervalSeconds = call.parameters["intervalSeconds"]?.toLongOrNull()
+                if (intervalSeconds == null || intervalSeconds <= 0) {
+                    call.respondText(
+                        "Invalid interval. Please provide a positive number of seconds.",
+                        status = HttpStatusCode.BadRequest
+                    )
+                    return@post
+                }
+
+                schedulerService.edi1Messages.updateInterval(intervalSeconds.seconds)
+
+                call.respondText("EDI 1 messages scheduler interval updated to $intervalSeconds seconds.")
             }
         }
     }

@@ -23,6 +23,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import no.nav.helsemelding.messagegenerator.config.Config
 import no.nav.helsemelding.messagegenerator.config.DialogMessage
+import no.nav.helsemelding.messagegenerator.config.Edi1Messages
 import no.nav.helsemelding.messagegenerator.config.EdiAdapter
 import no.nav.helsemelding.messagegenerator.config.IncomingMessages
 import no.nav.helsemelding.messagegenerator.config.Kafka
@@ -32,6 +33,7 @@ import no.nav.helsemelding.messagegenerator.config.Server
 import no.nav.helsemelding.messagegenerator.config.Topics
 import no.nav.helsemelding.messagegenerator.model.SchedulerStatus
 import no.nav.helsemelding.messagegenerator.processor.DialogMessageProcessor
+import no.nav.helsemelding.messagegenerator.processor.Edi1MessageProducer
 import no.nav.helsemelding.messagegenerator.processor.FakeEdiAdapterClient
 import no.nav.helsemelding.messagegenerator.processor.IncomingMessageProducer
 import no.nav.helsemelding.messagegenerator.publisher.FakeDialogMessagePublisher
@@ -203,6 +205,10 @@ private fun testSchedulerService(enableSchedulers: Boolean): SchedulerService {
         incomingMessages = IncomingMessages(
             enabled = enableSchedulers,
             interval = 4.minutes
+        ),
+        edi1Messages = Edi1Messages(
+            enableSchedulers,
+            interval = 2.minutes
         )
     )
 
@@ -211,6 +217,12 @@ private fun testSchedulerService(enableSchedulers: Boolean): SchedulerService {
         config = config,
         dialogMessageProcessor = DialogMessageProcessor(FakeDialogMessagePublisher()),
         incomingMessageProducer = IncomingMessageProducer(
+            ediAdapterClient = FakeEdiAdapterClient(),
+            template = "<MsgHead></MsgHead>",
+            names = listOf("Test Person"),
+            messages = listOf("Test message")
+        ),
+        edi1MessageProducer = Edi1MessageProducer(
             ediAdapterClient = FakeEdiAdapterClient(),
             template = "<MsgHead></MsgHead>",
             names = listOf("Test Person"),

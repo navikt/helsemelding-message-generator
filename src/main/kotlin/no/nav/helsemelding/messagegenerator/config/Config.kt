@@ -11,7 +11,8 @@ data class Config(
     val server: Server,
     val kafka: Kafka,
     val ediAdapter: EdiAdapter,
-    val incomingMessages: IncomingMessages
+    val incomingMessages: IncomingMessages,
+    val edi1Messages: Edi1Messages
 )
 
 data class Server(
@@ -89,6 +90,11 @@ data class EdiAdapter(
 )
 
 data class IncomingMessages(
+    val enabled: Boolean,
+    val interval: Duration
+)
+
+data class Edi1Messages(
     val enabled: Boolean,
     val interval: Duration
 )

@@ -18,6 +18,7 @@ import no.nav.helsemelding.messagegenerator.plugin.configureContentNegotiation
 import no.nav.helsemelding.messagegenerator.plugin.configureMetrics
 import no.nav.helsemelding.messagegenerator.plugin.configureRoutes
 import no.nav.helsemelding.messagegenerator.processor.DialogMessageProcessor
+import no.nav.helsemelding.messagegenerator.processor.Edi1MessageProducer
 import no.nav.helsemelding.messagegenerator.processor.IncomingMessageProducer
 import no.nav.helsemelding.messagegenerator.publisher.DialogMessagePublisher
 import no.nav.helsemelding.messagegenerator.scheduler.SchedulerService
@@ -36,11 +37,14 @@ fun main() = SuspendApp {
 
             val incomingMessageProducer = IncomingMessageProducer(deps.ediAdapterClient)
 
+            val edi1MessageProducer = Edi1MessageProducer(deps.ediAdapterClient)
+
             val schedulerService = SchedulerService(
                 scope = scope,
                 config = config(),
                 dialogMessageProcessor = dialogMessageProcessor,
-                incomingMessageProducer = incomingMessageProducer
+                incomingMessageProducer = incomingMessageProducer,
+                edi1MessageProducer = edi1MessageProducer
             )
 
             server(

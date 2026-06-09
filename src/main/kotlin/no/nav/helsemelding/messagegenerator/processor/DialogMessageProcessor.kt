@@ -42,7 +42,8 @@ class DialogMessageProcessor(
             "{senderHerId}" to FAGSYSTEM_HERID,
             "{receiverHerId}" to EPJ_HERID,
             "{patientName}" to names.random(),
-            "{message}" to messages.random()
+            "{message}" to messages.random(),
+            "{attachments}" to ""
         )
         val xml = replaceInTemplate(template, params)
         return nextDialogMessage(xml, (1..11).random()).asFlow()
