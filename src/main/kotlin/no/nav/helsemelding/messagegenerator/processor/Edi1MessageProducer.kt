@@ -37,7 +37,7 @@ class Edi1MessageProducer(
         val xml = replaceInTemplate(template, params)
 
         val ebXmlOverrides = EbXmlInfo(
-            cpaId = "nav:qass:32227",
+            cpaId = "nav:qass:39056",
             role = "Sykmelder",
             service = "Sykmelding",
             action = "Registrering"
