@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- -->
+<!-- Dette er en testmelding med fiktive personer -->
+<!-- -->
+<MsgHead xmlns="http://www.kith.no/xmlstds/msghead/2006-05-24" xmlns:xsd="http://www.w3.org/2001/XMLSchema.xsd" xmlns:fk1="http://www.kith.no/xmlstds/felleskomponent1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.kith.no/xmlstds/msghead/2006-05-24 MsgHead-v1_2.xsd">
+    <MsgInfo>
+        <Type DN="Vurdering av arbeidsmulighet / sykmelding" V="SYKMELD"/>
+        <MIGversion>v1.2 2006-05-24</MIGversion>
+        <GenDate>{genDate}</GenDate>
+        <MsgId>{messageId}</MsgId>
+        <Sender>
+            <Organisation>
+                <OrganisationName>ARBEIDS- OG VELFERDSETATEN</OrganisationName>
+                <Ident>
+                    <Id>90128</Id>
+                    <TypeId V="HER" DN="HER-id" S="2.16.578.1.12.4.1.1.9051"/>
+                </Ident>
+                <Organisation>
+                    <OrganisationName>Samhandling Arbeids- og velferdsetaten</OrganisationName>
+                    <Ident>
+                        <Id>{senderHerId}</Id>
+                        <TypeId V="HER" DN="HER-id" S="2.16.578.1.12.4.1.1.9051"/>
+                    </Ident>
+                </Organisation>
+            </Organisation>
+        </Sender>
+        <Receiver>
+            <ComMethod V="EDI" DN="EDI"/>
+            <Organisation>
+                <OrganisationName>ARBEIDS- OG VELFERDSETATEN</OrganisationName>
+                <Ident>
+                    <Id>889640782</Id>
+                    <TypeId V="ENH" S="2.16.578.1.12.4.1.1.9051" DN="Organisasjonsnummeret i Enhetsregister"/>
+                </Ident>
+                <Ident>
+                    <Id>90128</Id>
+                    <TypeId V="HER" S="2.16.578.1.12.4.1.1.9051" DN="HER-id"/>
+                </Ident>
+                <Organisation>
+                    <OrganisationName>Samhandling Arbeids- og velferdsetaten</OrganisationName>
+                    <Ident>
+                        <Id>79768</Id>
+                        <TypeId V="HER" S="2.16.578.1.12.4.1.1.9051" DN="HER-id"/>
+                    </Ident>
+                </Organisation>
+            </Organisation>
+        </Receiver>
+        <Patient>
+            <FamilyName>Jord</FamilyName>
+            <GivenName>{patientName}</GivenName>
+            <DateOfBirth>1972-12-31</DateOfBirth>
+            <Sex V="2" DN="Kvinne"/>
+            <Ident>
+                <Id>31777207884</Id>
+                <TypeId V="FNR" DN="Fødselsnummer" S="2.16.578.1.12.4.1.1.8116"/>
+            </Ident>
+        </Patient>
+    </MsgInfo>
+    <Document>
+        <RefDoc>
+            <IssueDate V="2018-01-24T10:10:47"/>
+            <MsgType V="XML" DN="XML-instans"/>
+            <Content>
+                <ho:HelseOpplysningerArbeidsuforhet
+                        xsi:schemaLocation="http://www.kith.no/xmlstds/HelseOpplysningerArbeidsuforhet/2013-10-01 HelseOpplysningerArbeidsuforhet_2013-10-01.xsd"
+                        xmlns:ho="http://www.kith.no/xmlstds/HelseOpplysningerArbeidsuforhet/2013-10-01"
+                        xmlns:fk1="http://www.kith.no/xmlstds/felleskomponent1">
+                    <ho:RegelSettVersjon>3</ho:RegelSettVersjon>
+                    <ho:SyketilfelleStartDato>2026-05-27</ho:SyketilfelleStartDato>
+                    <ho:Pasient>
+                        <ho:Navn>
+                            <ho:Etternavn>Storbonde</ho:Etternavn>
+                            <ho:Fornavn>Sjalottløk</ho:Fornavn>
+                        </ho:Navn>
+                        <ho:Fodselsnummer>
+                            <fk1:Id>31777207884</fk1:Id>
+                            <fk1:TypeId DN="Fødselsnummer" S="2.16.578.1.12.4.1.1.8116" V="FNR"/>
+                        </ho:Fodselsnummer>
+                    </ho:Pasient>
+                    <ho:Arbeidsgiver>
+                        <ho:HarArbeidsgiver DN="Én arbeidsgiver" V="1"/>
+                    </ho:Arbeidsgiver>
+                    <ho:MedisinskVurdering>
+                        <ho:HovedDiagnose>
+                            <ho:Diagnosekode DN="Lumbago med isjialgi" S="2.16.578.1.12.4.1.1.7110" V="M544"/>
+                        </ho:HovedDiagnose>
+                    </ho:MedisinskVurdering>
+                    <ho:Aktivitet>
+                        <ho:Periode>
+                            <ho:PeriodeFOMDato>2026-05-27</ho:PeriodeFOMDato>
+                            <ho:PeriodeTOMDato>2026-07-01</ho:PeriodeTOMDato>
+                            <ho:AktivitetIkkeMulig>
+                                <ho:MedisinskeArsaker>
+                                    <ho:Arsakskode DN="Helsetilstanden hindrer pasienten i å være i aktivitet"
+                                                   V="1"/>
+                                </ho:MedisinskeArsaker>
+                            </ho:AktivitetIkkeMulig>
+                        </ho:Periode>
+                    </ho:Aktivitet>
+                    <ho:MeldingTilNav>
+                        <ho:BistandNAVUmiddelbart>false</ho:BistandNAVUmiddelbart>
+                    </ho:MeldingTilNav>
+                    <ho:KontaktMedPasient>
+                        <ho:BehandletDato>2026-06-04T11:34:49</ho:BehandletDato>
+                    </ho:KontaktMedPasient>
+                    <ho:Behandler>
+                        <ho:Navn>
+                            <ho:Etternavn>Jensen</ho:Etternavn>
+                            <ho:Fornavn>Kent</ho:Fornavn>
+                        </ho:Navn>
+                        <ho:Id>
+                            <fk1:Id>565549806</fk1:Id>
+                            <fk1:TypeId V="HPR" S="2.16.578.1.12.4.1.1.8116" DN="HPR-nummer"/>
+                        </ho:Id>
+                        <ho:Adresse>
+                            <fk1:StreetAdr>SYKEHUSVEIEN 38</fk1:StreetAdr>
+                            <fk1:PostalCode>9019</fk1:PostalCode>
+                            <fk1:City>TROMSØ</fk1:City>
+                        </ho:Adresse>
+                        <ho:KontaktInfo>
+                            <fk1:TypeTelecom V="WP"/>
+                            <fk1:TeleAddress V="tel:77626000"/>
+                        </ho:KontaktInfo>
+                    </ho:Behandler>
+                    <ho:AvsenderSystem>
+                        <ho:SystemNavn>DIPS Arena</ho:SystemNavn>
+                        <ho:SystemVersjon>20.1</ho:SystemVersjon>
+                    </ho:AvsenderSystem>
+                    <ho:Strekkode>00230772002900906202613251890000011</ho:Strekkode>
+                </ho:HelseOpplysningerArbeidsuforhet>
+            </Content>
+        </RefDoc>
+    </Document>
+</MsgHead>

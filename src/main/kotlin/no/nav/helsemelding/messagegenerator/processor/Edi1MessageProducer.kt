@@ -18,7 +18,7 @@ private const val EDI1_BASE64_ENCODING = "base64"
 
 class Edi1MessageProducer(
     private val ediAdapterClient: EdiAdapterClient,
-    private val template: String = readFileToString("templates/edi1Message.xml") ?: "",
+    private val template: String = readFileToString("templates/sykemelding.xml") ?: "",
     private val names: List<String> = readFileToList("names.txt").orEmpty(),
     private val messages: List<String> = readFileToList("messages.txt").orEmpty()
 ) {
@@ -40,7 +40,8 @@ class Edi1MessageProducer(
             cpaId = "nav:qass:39056",
             role = "Sykmelder",
             service = "Sykmelding",
-            action = "Registrering"
+            action = "Registrering",
+            receiverRole = "Saksbehandler"
         )
 
         ediAdapterClient.postMessage(xml.toPostMessageRequest(ebXmlOverrides))
