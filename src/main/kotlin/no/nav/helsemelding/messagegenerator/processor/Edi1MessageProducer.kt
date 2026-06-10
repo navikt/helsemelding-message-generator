@@ -36,15 +36,22 @@ class Edi1MessageProducer(
 
         val xml = replaceInTemplate(template, params)
 
-        ediAdapterClient.postMessage(xml.toPostMessageRequest())
+        val ebXmlOverrides = EbXmlInfo(
+            cpaId = "nav:qass:32227",
+            role = "Sykmelder",
+            service = "Sykmelding",
+            action = "Registrering"
+        )
+
+        ediAdapterClient.postMessage(xml.toPostMessageRequest(ebXmlOverrides))
             .onRight { metadata ->
                 log.info {
-                    "messageId=$messageId Successfully sent EDI1 message to EDI Adapter with externalRefId=${metadata.id}"
+                    "eMottak test: messageId=$messageId Successfully sent EDI1 message to EDI Adapter with externalRefId=${metadata.id}"
                 }
             }
             .onLeft { error ->
                 log.error {
-                    "messageId=$messageId Failed sending EDI1 message to EDI Adapter: $error"
+                    "eMottak test: messageId=$messageId Failed sending EDI1 message to EDI Adapter: $error"
                 }
             }
     }

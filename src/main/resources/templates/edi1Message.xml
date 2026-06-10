@@ -25,17 +25,22 @@
             </Organisation>
         </Sender>
         <Receiver>
+            <ComMethod V="EDI" DN="EDI"/>
             <Organisation>
                 <OrganisationName>ARBEIDS- OG VELFERDSETATEN</OrganisationName>
                 <Ident>
+                    <Id>889640782</Id>
+                    <TypeId V="ENH" S="2.16.578.1.12.4.1.1.9051" DN="Organisasjonsnummeret i Enhetsregister"/>
+                </Ident>
+                <Ident>
                     <Id>90128</Id>
-                    <TypeId V="HER" DN="HER-id" S="2.16.578.1.12.4.1.1.9051"/>
+                    <TypeId V="HER" S="2.16.578.1.12.4.1.1.9051" DN="HER-id"/>
                 </Ident>
                 <Organisation>
                     <OrganisationName>Samhandling Arbeids- og velferdsetaten</OrganisationName>
                     <Ident>
-                        <Id>{receiverHerId}</Id>
-                        <TypeId V="HER" DN="HER-id" S="2.16.578.1.12.4.1.1.9051"/>
+                        <Id>111949</Id>
+                        <TypeId V="HER" S="2.16.578.1.12.4.1.1.9051" DN="HER-id"/>
                     </Ident>
                 </Organisation>
             </Organisation>
