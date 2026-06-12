@@ -38,7 +38,7 @@ class Edi1MessageProducer(
 
         val ebXmlOverrides = EbXmlInfo(
             cpaId = "nav:qass:39056",
-            role = "Sykmelder",
+            senderRole = "Sykmelder",
             service = "Sykmelding",
             action = "Registrering",
             receiverRole = "Saksbehandler"
