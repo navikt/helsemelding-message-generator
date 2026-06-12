@@ -164,19 +164,15 @@ class FakeEdiAdapterClient : EdiAdapterClient {
 
     override suspend fun markMessageAsRead(id: Uuid, herId: Int): Either<ErrorMessage, Boolean> = Left(errorMessage404)
 
-    @ExperimentalEdiAdapterApi
-    override suspend fun postMshConfiguration(postMshConfigurationRequest: PostMshConfigurationRequest): Either<ErrorMessage, Unit> {
-        TODO("Not yet implemented")
-    }
-
     override suspend fun getApprecInfo(id: Uuid): Either<ErrorMessage, List<ApprecInfo>> = Left(errorMessage404)
 
     override suspend fun getMessages(getMessagesRequest: GetMessagesRequest): Either<ErrorMessage, List<Message>> = Left(errorMessage404)
 
     @ExperimentalEdiAdapterApi
-    override suspend fun getNotices(getNoticesRequest: GetNoticesRequest): Either<ErrorMessage, List<Notice>> {
-        TODO("Not yet implemented")
-    }
+    override suspend fun postMshConfiguration(postMshConfigurationRequest: PostMshConfigurationRequest): Either<ErrorMessage, Unit> = Left(errorMessage404)
+
+    @ExperimentalEdiAdapterApi
+    override suspend fun getNotices(getNoticesRequest: GetNoticesRequest): Either<ErrorMessage, List<Notice>> = Left(errorMessage404)
 
     override fun close() {}
 }
