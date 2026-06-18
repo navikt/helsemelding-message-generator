@@ -50,6 +50,7 @@ fun main() = SuspendApp {
                 module = messageGeneratorModule(
                     deps.meterRegistry,
                     dialogMessageProcessor,
+                    incomingMessageProducer,
                     schedulerService
                 )
             )
@@ -65,12 +66,18 @@ fun main() = SuspendApp {
 internal fun messageGeneratorModule(
     meterRegistry: PrometheusMeterRegistry,
     dialogMessageProcessor: DialogMessageProcessor,
+    incomingMessageProducer: IncomingMessageProducer,
     schedulerService: SchedulerService
 ): Application.() -> Unit {
     return {
         configureMetrics(meterRegistry)
         configureContentNegotiation()
-        configureRoutes(meterRegistry, dialogMessageProcessor, schedulerService)
+        configureRoutes(
+            meterRegistry,
+            dialogMessageProcessor,
+            incomingMessageProducer,
+            schedulerService
+        )
     }
 }
 

@@ -164,6 +164,12 @@ private fun routesTestApplication(
         configureRoutes(
             registry = PrometheusMeterRegistry(PrometheusConfig.DEFAULT),
             dialogMessageProcessor = DialogMessageProcessor(FakeDialogMessagePublisher()),
+            incomingMessageProducer = IncomingMessageProducer(
+                ediAdapterClient = FakeEdiAdapterClient(),
+                template = "<MsgHead></MsgHead>",
+                names = listOf("Test Person"),
+                messages = listOf("Test message")
+            ),
             schedulerService = schedulerService
         )
     }
