@@ -39,6 +39,38 @@ import no.nav.helsemelding.messagegenerator.scheduler.SchedulerService
 import kotlin.time.Duration.Companion.minutes
 
 class RoutesSpec : StringSpec({
+    "/generate/dialog-messages endpoint triggers dialog message generation" {
+        routesTestApplication { client ->
+            val testCases = listOf(
+                "/generate/dialog-messages" to 1,
+                "/generate/dialog-messages?count=3" to 3
+            )
+
+            testCases.forEach { (urlString, messageCount) ->
+                val response = client.get(urlString)
+
+                response.status shouldBe HttpStatusCode.OK
+                response.bodyAsText() shouldBe "Published $messageCount dialog messages."
+            }
+        }
+    }
+
+    "/generate/incoming-messages endpoint triggers incoming message generation" {
+        routesTestApplication { client ->
+            val testCases = listOf(
+                "/generate/incoming-messages" to 1,
+                "/generate/incoming-messages?count=3" to 3
+            )
+
+            testCases.forEach { (urlString, messageCount) ->
+                val response = client.get(urlString)
+
+                response.status shouldBe HttpStatusCode.OK
+                response.bodyAsText() shouldBe "Published $messageCount incoming messages."
+            }
+        }
+    }
+
     "/scheduler/status endpoint returns json payload" {
         routesTestApplication { client ->
             val response = client.get("/scheduler/status") {

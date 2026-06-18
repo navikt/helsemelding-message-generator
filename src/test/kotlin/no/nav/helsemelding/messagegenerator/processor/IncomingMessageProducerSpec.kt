@@ -81,13 +81,6 @@ class IncomingMessageProducerSpec : StringSpec(
         }
 
         "processMessage should send XML with attachments" {
-            val metadata = Metadata(
-                id = Uuid.random(),
-                location = "https://example.com/messages/${Uuid.random()}"
-            )
-
-            ediAdapterClient.givenPostMessageResponse(Right(metadata))
-
             producer.produceIncomingMessage(
                 addAttachments = true,
                 attachmentsCount = 2
@@ -105,13 +98,6 @@ class IncomingMessageProducerSpec : StringSpec(
         }
 
         "processMessage should send XML without attachments" {
-            val metadata = Metadata(
-                id = Uuid.random(),
-                location = "https://example.com/messages/${Uuid.random()}"
-            )
-
-            ediAdapterClient.givenPostMessageResponse(Right(metadata))
-
             producer.produceIncomingMessage(
                 addAttachments = false
             )
@@ -130,7 +116,12 @@ class IncomingMessageProducerSpec : StringSpec(
 )
 
 class FakeEdiAdapterClient : EdiAdapterClient {
-    private var postMessageResponse: Either<ErrorMessage, Metadata>? = null
+    private var postMessageResponse: Either<ErrorMessage, Metadata> = Right(
+        Metadata(
+            id = Uuid.random(),
+            location = "https://example.com/messages/${Uuid.random()}"
+        )
+    )
     private var postMessageRequest: PostMessageRequest? = null
 
     val errorMessage404 = ErrorMessage(
@@ -147,7 +138,7 @@ class FakeEdiAdapterClient : EdiAdapterClient {
 
     override suspend fun postMessage(postMessagesRequest: PostMessageRequest): Either<ErrorMessage, Metadata> {
         this.postMessageRequest = postMessagesRequest
-        return postMessageResponse ?: error("Post message response not set")
+        return postMessageResponse
     }
 
     override suspend fun getMessageStatus(id: Uuid): Either<ErrorMessage, List<StatusInfo>> = Left(errorMessage404)
