@@ -1,4 +1,4 @@
-package no.nav.helsemelding.messagegenerator.processor
+package no.nav.helsemelding.messagegenerator.generator
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -22,13 +22,13 @@ const val FAGSYSTEM_HERID = "8142519"
 const val EPJ_HERID = "8142520"
 val invalidRecordKeys = listOf(null, "", "1234-abcd")
 
-class DialogMessageProcessor(
+class DialogMessageGenerator(
     private val messagePublisher: MessagePublisher,
     private val template: String = readFileToString("templates/dialogMessage.xml") ?: "",
     private val names: List<String> = readFileToList("names.txt").orEmpty(),
     private val messages: List<String> = readFileToList("messages.txt").orEmpty()
 ) {
-    fun processMessages(scope: CoroutineScope) =
+    fun generateMessages(scope: CoroutineScope) =
         messageFlow()
             .onEach(::publishDialogMessage)
             .flowOn(Dispatchers.IO)

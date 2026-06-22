@@ -1,4 +1,4 @@
-package no.nav.helsemelding.messagegenerator.processor
+package no.nav.helsemelding.messagegenerator.generator
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.ktor.http.ContentType

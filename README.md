@@ -63,12 +63,12 @@ Relevant configuration for adjusting the frequency and toggle scheduler for dial
 
 To run this locally (meaning without actually publishing to kafka topic) change the following in App.kt:
 ```kotlin
-val dialogMessageProcessor = DialogMessageProcessor(dialogMessagePublisher)
+val dialogMessageGenerator = DialogMessageGenerator(dialogMessagePublisher)
 ```
 
 to use `FakeDialogMessagePublisher` instead:
 ```kotlin
-val dialogMessageProcessor = DialogMessageProcessor(FakeDialogMessagePublisher())
+val dialogMessageGenerator = DialogMessageGenerator(FakeDialogMessagePublisher())
 ```
 
 ## Dynamic scheduler configuration 

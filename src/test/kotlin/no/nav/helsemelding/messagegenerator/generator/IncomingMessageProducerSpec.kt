@@ -1,4 +1,4 @@
-package no.nav.helsemelding.messagegenerator.processor
+package no.nav.helsemelding.messagegenerator.generator
 
 import arrow.core.Either
 import arrow.core.Either.Left

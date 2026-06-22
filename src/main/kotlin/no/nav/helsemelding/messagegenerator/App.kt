@@ -6,16 +6,15 @@ import arrow.core.raise.result
 import arrow.fx.coroutines.resourceScope
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.ktor.server.application.Application
-import io.ktor.server.engine.logError
 import io.ktor.server.netty.Netty
 import io.ktor.utils.io.CancellationException
 import io.micrometer.prometheus.PrometheusMeterRegistry
 import kotlinx.coroutines.awaitCancellation
+import no.nav.helsemelding.messagegenerator.generator.DialogMessageGenerator
+import no.nav.helsemelding.messagegenerator.generator.IncomingMessageProducer
 import no.nav.helsemelding.messagegenerator.plugin.configureContentNegotiation
 import no.nav.helsemelding.messagegenerator.plugin.configureMetrics
 import no.nav.helsemelding.messagegenerator.plugin.configureRoutes
-import no.nav.helsemelding.messagegenerator.processor.DialogMessageProcessor
-import no.nav.helsemelding.messagegenerator.processor.IncomingMessageProducer
 import no.nav.helsemelding.messagegenerator.publisher.DialogMessagePublisher
 import no.nav.helsemelding.messagegenerator.scheduler.SchedulerService
 import no.nav.helsemelding.messagegenerator.util.coroutineScope
@@ -29,14 +28,14 @@ fun main() = SuspendApp {
             val scope = coroutineScope(coroutineContext)
 
             val dialogMessagePublisher = DialogMessagePublisher(deps.kafkaPublisher)
-            val dialogMessageProcessor = DialogMessageProcessor(dialogMessagePublisher)
+            val dialogMessageGenerator = DialogMessageGenerator(dialogMessagePublisher)
 
             val incomingMessageProducer = IncomingMessageProducer(deps.ediAdapterClient)
 
             val schedulerService = SchedulerService(
                 scope = scope,
                 config = config(),
-                dialogMessageProcessor = dialogMessageProcessor,
+                dialogMessageGenerator = dialogMessageGenerator,
                 incomingMessageProducer = incomingMessageProducer
             )
 
@@ -46,7 +45,7 @@ fun main() = SuspendApp {
                 preWait = config().server.preWait,
                 module = messageGeneratorModule(
                     deps.meterRegistry,
-                    dialogMessageProcessor,
+                    dialogMessageGenerator,
                     incomingMessageProducer,
                     schedulerService
                 )
@@ -62,7 +61,7 @@ fun main() = SuspendApp {
 
 internal fun messageGeneratorModule(
     meterRegistry: PrometheusMeterRegistry,
-    dialogMessageProcessor: DialogMessageProcessor,
+    dialogMessageGenerator: DialogMessageGenerator,
     incomingMessageProducer: IncomingMessageProducer,
     schedulerService: SchedulerService
 ): Application.() -> Unit {
@@ -71,7 +70,7 @@ internal fun messageGeneratorModule(
         configureContentNegotiation()
         configureRoutes(
             meterRegistry,
-            dialogMessageProcessor,
+            dialogMessageGenerator,
             incomingMessageProducer,
             schedulerService
         )

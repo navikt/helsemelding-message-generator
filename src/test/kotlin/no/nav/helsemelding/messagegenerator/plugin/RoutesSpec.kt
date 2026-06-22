@@ -30,10 +30,10 @@ import no.nav.helsemelding.messagegenerator.config.Port
 import no.nav.helsemelding.messagegenerator.config.Scope
 import no.nav.helsemelding.messagegenerator.config.Server
 import no.nav.helsemelding.messagegenerator.config.Topics
+import no.nav.helsemelding.messagegenerator.generator.DialogMessageGenerator
+import no.nav.helsemelding.messagegenerator.generator.FakeEdiAdapterClient
+import no.nav.helsemelding.messagegenerator.generator.IncomingMessageProducer
 import no.nav.helsemelding.messagegenerator.model.SchedulerStatus
-import no.nav.helsemelding.messagegenerator.processor.DialogMessageProcessor
-import no.nav.helsemelding.messagegenerator.processor.FakeEdiAdapterClient
-import no.nav.helsemelding.messagegenerator.processor.IncomingMessageProducer
 import no.nav.helsemelding.messagegenerator.publisher.FakeDialogMessagePublisher
 import no.nav.helsemelding.messagegenerator.scheduler.SchedulerService
 import kotlin.time.Duration.Companion.minutes
@@ -195,7 +195,7 @@ private fun routesTestApplication(
         configureContentNegotiation()
         configureRoutes(
             registry = PrometheusMeterRegistry(PrometheusConfig.DEFAULT),
-            dialogMessageProcessor = DialogMessageProcessor(FakeDialogMessagePublisher()),
+            dialogMessageGenerator = DialogMessageGenerator(FakeDialogMessagePublisher()),
             incomingMessageProducer = IncomingMessageProducer(
                 ediAdapterClient = FakeEdiAdapterClient(),
                 template = "<MsgHead></MsgHead>",
@@ -247,7 +247,7 @@ private fun testSchedulerService(enableSchedulers: Boolean): SchedulerService {
     return SchedulerService(
         scope = scope,
         config = config,
-        dialogMessageProcessor = DialogMessageProcessor(FakeDialogMessagePublisher()),
+        dialogMessageGenerator = DialogMessageGenerator(FakeDialogMessagePublisher()),
         incomingMessageProducer = IncomingMessageProducer(
             ediAdapterClient = FakeEdiAdapterClient(),
             template = "<MsgHead></MsgHead>",

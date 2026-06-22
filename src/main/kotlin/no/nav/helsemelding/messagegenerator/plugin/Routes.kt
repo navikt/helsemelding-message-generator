@@ -13,8 +13,8 @@ import io.ktor.server.routing.routing
 import io.micrometer.prometheus.PrometheusMeterRegistry
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
-import no.nav.helsemelding.messagegenerator.processor.DialogMessageProcessor
-import no.nav.helsemelding.messagegenerator.processor.IncomingMessageProducer
+import no.nav.helsemelding.messagegenerator.generator.DialogMessageGenerator
+import no.nav.helsemelding.messagegenerator.generator.IncomingMessageProducer
 import no.nav.helsemelding.messagegenerator.scheduler.SchedulerService
 import kotlin.time.Duration.Companion.seconds
 
@@ -22,14 +22,14 @@ private val log = KotlinLogging.logger {}
 
 fun Application.configureRoutes(
     registry: PrometheusMeterRegistry,
-    dialogMessageProcessor: DialogMessageProcessor,
+    dialogMessageGenerator: DialogMessageGenerator,
     incomingMessageProducer: IncomingMessageProducer,
     schedulerService: SchedulerService
 ) {
     routing {
         internalRoutes(registry)
         externalRoutes(
-            dialogMessageProcessor,
+            dialogMessageGenerator,
             incomingMessageProducer,
             schedulerService
         )
@@ -51,7 +51,7 @@ fun Route.internalRoutes(registry: PrometheusMeterRegistry) {
 }
 
 fun Route.externalRoutes(
-    dialogMessageProcessor: DialogMessageProcessor,
+    dialogMessageGenerator: DialogMessageGenerator,
     incomingMessageProducer: IncomingMessageProducer,
     schedulerService: SchedulerService
 ) {
@@ -63,7 +63,7 @@ fun Route.externalRoutes(
             var published = 0
             coroutineScope {
                 repeat(count) {
-                    dialogMessageProcessor.processMessages(this)
+                    dialogMessageGenerator.generateMessages(this)
                     published++
                     if (it < count - 1) delay(1000)
                 }
