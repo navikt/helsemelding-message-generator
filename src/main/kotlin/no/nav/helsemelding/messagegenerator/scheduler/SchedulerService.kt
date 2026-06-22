@@ -2,14 +2,14 @@ package no.nav.helsemelding.messagegenerator.scheduler
 
 import kotlinx.coroutines.CoroutineScope
 import no.nav.helsemelding.messagegenerator.config.Config
-import no.nav.helsemelding.messagegenerator.processor.DialogMessageProcessor
-import no.nav.helsemelding.messagegenerator.processor.IncomingMessageProducer
+import no.nav.helsemelding.messagegenerator.generator.DialogMessageGenerator
+import no.nav.helsemelding.messagegenerator.generator.IncomingMessageGenerator
 
 class SchedulerService(
     scope: CoroutineScope,
     config: Config,
-    dialogMessageProcessor: DialogMessageProcessor,
-    incomingMessageProducer: IncomingMessageProducer
+    dialogMessageGenerator: DialogMessageGenerator,
+    incomingMessageGenerator: IncomingMessageGenerator
 ) {
     val dialogMessages = ManagedScheduler(
         name = "dialog-messages",
@@ -17,7 +17,7 @@ class SchedulerService(
         initialInterval = config.kafka.topics.dialogMessage.interval,
         scope = scope,
         action = {
-            dialogMessageProcessor.processMessages(scope)
+            dialogMessageGenerator.generateMessages(scope)
         }
     )
 
@@ -27,7 +27,7 @@ class SchedulerService(
         initialInterval = config.incomingMessages.interval,
         scope = scope,
         action = {
-            incomingMessageProducer.produceIncomingMessage()
+            incomingMessageGenerator.generateIncomingMessage()
         }
     )
 

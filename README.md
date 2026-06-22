@@ -37,6 +37,11 @@ In order to test the incoming message flow, the application also produces incomi
 The application produces incoming messages based on the `dialogMessage.xml` template. The difference between the outgoing and incoming messages is that HER-id of the receiver and sender are swapped.
 Incoming messages are sent to NHN using EDI Adapter.
 
+### Incoming message with attachment
+
+Incoming messages can contain an attachment (50% chance).
+Attachment consists of 1-3 `attachment.xml` nodes.
+
 ## Local development
 
 Running the application locally:
@@ -58,19 +63,19 @@ Relevant configuration for adjusting the frequency and toggle scheduler for dial
 
 To run this locally (meaning without actually publishing to kafka topic) change the following in App.kt:
 ```kotlin
-val dialogMessageProcessor = DialogMessageProcessor(dialogMessagePublisher)
+val dialogMessageGenerator = DialogMessageGenerator(dialogMessagePublisher)
 ```
 
 to use `FakeDialogMessagePublisher` instead:
 ```kotlin
-val dialogMessageProcessor = DialogMessageProcessor(FakeDialogMessagePublisher())
+val dialogMessageGenerator = DialogMessageGenerator(FakeDialogMessagePublisher())
 ```
 
 ## Dynamic scheduler configuration 
 
 The service exposes endpoints for dynamic configuration of the scheduler:
 
-#### Get scheduler status
+### Get scheduler status
 
 `GET /scheduler/status`
 
@@ -97,7 +102,7 @@ Example response:
 }
 ```
 
-#### Stop dialog message scheduler
+### Stop dialog message scheduler
 
 `POST /scheduler/dialog-messages/stop`
 
@@ -107,7 +112,7 @@ Disables generation of dialog messages.
 curl -X POST https://<host>/scheduler/dialog-messages/stop
 ```
 
-#### Start dialog message scheduler
+### Start dialog message scheduler
 
 `POST /scheduler/dialog-messages/start`
 
@@ -117,7 +122,7 @@ Enables generation of dialog messages.
 curl -X POST https://<host>/scheduler/dialog-messages/start
 ```
 
-#### Update dialog message interval
+### Update dialog message interval
 
 `POST /scheduler/dialog-messages/interval/{seconds}`
 
@@ -128,7 +133,7 @@ Updates the interval between generations of dialog messages.
 curl -X POST https://<host>/scheduler/dialog-messages/interval/300
 ```
 
-#### Stop incoming message scheduler
+### Stop incoming message scheduler
 
 `POST /scheduler/incoming-messages/stop`
 
@@ -138,7 +143,7 @@ Disables generation of incoming messages.
 curl -X POST https://<host>/scheduler/incoming-messages/stop
 ```
 
-#### Start incoming message scheduler
+### Start incoming message scheduler
 
 `POST /scheduler/incoming-messages/start`
 
@@ -148,7 +153,7 @@ Enables generation of incoming messages.
 curl -X POST https://<host>/scheduler/incoming-messages/start
 ```
 
-#### Update incoming message interval
+### Update incoming message interval
 
 `POST /scheduler/incoming-messages/interval/{seconds}`
 
@@ -158,3 +163,21 @@ Updates the interval between generations of incoming messages.
 ```
 curl -X POST https://<host>/scheduler/incoming-messages/interval/30
 ```
+
+## Generating messages on demand
+
+The service exposes also endpoints for generating messages on demand.
+This can be useful for testing the message flow without waiting for the scheduler to trigger.
+You can specify the number of messages to generate using the `count` query parameter. 
+If `count` is not specified, it defaults to 1.
+Maximum value for `count` is 100 to prevent excessive load on the system.
+Messages are generated with 1 second interval.
+
+### Generate dialog messages
+
+`GET /generate/dialog-messages?count={count}`
+
+### Generate incoming messages
+
+`GET /generate/incoming-messages?count={count}`
+
