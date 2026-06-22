@@ -32,10 +32,10 @@ import no.nav.helsemelding.messagegenerator.config.Scope
 import no.nav.helsemelding.messagegenerator.config.Server
 import no.nav.helsemelding.messagegenerator.config.Topics
 import no.nav.helsemelding.messagegenerator.generator.DialogMessageGenerator
+import no.nav.helsemelding.messagegenerator.generator.Edi1MessageGenerator
 import no.nav.helsemelding.messagegenerator.generator.FakeEdiAdapterClient
 import no.nav.helsemelding.messagegenerator.generator.IncomingMessageGenerator
 import no.nav.helsemelding.messagegenerator.model.SchedulerStatus
-import no.nav.helsemelding.messagegenerator.processor.Edi1MessageProducer
 import no.nav.helsemelding.messagegenerator.publisher.FakeDialogMessagePublisher
 import no.nav.helsemelding.messagegenerator.scheduler.SchedulerService
 import kotlin.time.Duration.Companion.minutes
@@ -260,7 +260,7 @@ private fun testSchedulerService(enableSchedulers: Boolean): SchedulerService {
             names = listOf("Test Person"),
             messages = listOf("Test message")
         ),
-        edi1MessageProducer = Edi1MessageProducer(
+        edi1MessageGenerator = Edi1MessageGenerator(
             ediAdapterClient = FakeEdiAdapterClient(),
             template = "<MsgHead></MsgHead>",
             names = listOf("Test Person"),

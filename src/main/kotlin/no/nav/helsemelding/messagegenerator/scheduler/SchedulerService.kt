@@ -3,15 +3,15 @@ package no.nav.helsemelding.messagegenerator.scheduler
 import kotlinx.coroutines.CoroutineScope
 import no.nav.helsemelding.messagegenerator.config.Config
 import no.nav.helsemelding.messagegenerator.generator.DialogMessageGenerator
+import no.nav.helsemelding.messagegenerator.generator.Edi1MessageGenerator
 import no.nav.helsemelding.messagegenerator.generator.IncomingMessageGenerator
-import no.nav.helsemelding.messagegenerator.processor.Edi1MessageProducer
 
 class SchedulerService(
     scope: CoroutineScope,
     config: Config,
     dialogMessageGenerator: DialogMessageGenerator,
     incomingMessageGenerator: IncomingMessageGenerator,
-    edi1MessageProducer: Edi1MessageProducer
+    edi1MessageGenerator: Edi1MessageGenerator
 ) {
     val dialogMessages = ManagedScheduler(
         name = "dialog-messages",
@@ -39,7 +39,7 @@ class SchedulerService(
         initialInterval = config.edi1Messages.interval,
         scope = scope,
         action = {
-            edi1MessageProducer.produceEdi1Message()
+            edi1MessageGenerator.generateEdi1Message()
         }
     )
 

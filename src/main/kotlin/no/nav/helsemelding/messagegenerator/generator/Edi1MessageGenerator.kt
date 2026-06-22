@@ -1,4 +1,4 @@
-package no.nav.helsemelding.messagegenerator.processor
+package no.nav.helsemelding.messagegenerator.generator
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.ktor.http.ContentType
@@ -16,13 +16,13 @@ import kotlin.uuid.Uuid
 private val log = KotlinLogging.logger {}
 private const val EDI1_BASE64_ENCODING = "base64"
 
-class Edi1MessageProducer(
+class Edi1MessageGenerator(
     private val ediAdapterClient: EdiAdapterClient,
     private val template: String = readFileToString("templates/sykemelding.xml") ?: "",
     private val names: List<String> = readFileToList("names.txt").orEmpty(),
     private val messages: List<String> = readFileToList("messages.txt").orEmpty()
 ) {
-    suspend fun produceEdi1Message() {
+    suspend fun generateEdi1Message() {
         val messageId = Uuid.random().toString()
 
         val params = mapOf(
