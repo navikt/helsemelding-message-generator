@@ -26,7 +26,7 @@ import no.nav.helsemelding.messagegenerator.util.readFileToString
 import java.util.Base64
 import kotlin.uuid.Uuid
 
-class IncomingMessageProducerSpec : StringSpec(
+class IncomingMessageGeneratorSpec : StringSpec(
     {
         val template = readFileToString("templates/dialogMessage.xml")!!
 
@@ -34,21 +34,21 @@ class IncomingMessageProducerSpec : StringSpec(
         val messages = listOf("Dette er en testmelding")
 
         val ediAdapterClient = FakeEdiAdapterClient()
-        val producer = IncomingMessageProducer(
+        val generator = IncomingMessageGenerator(
             ediAdapterClient = ediAdapterClient,
             template = template,
             names = names,
             messages = messages
         )
 
-        "processMessage should send correct XML to Edi Adapter" {
+        "generateIncomingMessage should send correct XML to Edi Adapter" {
             val metadata = Metadata(
                 id = Uuid.random(),
                 location = "https://example.com/messages/${Uuid.random()}"
             )
             ediAdapterClient.givenPostMessageResponse(Right(metadata))
 
-            producer.produceIncomingMessage()
+            generator.generateIncomingMessage()
 
             val request = ediAdapterClient.getPostMessageRequest()
             request shouldNotBe null
@@ -64,7 +64,7 @@ class IncomingMessageProducerSpec : StringSpec(
             businessDocument shouldNotContain "<MsgId>{messageId}</MsgId>"
         }
 
-        "processMessage should handle an error response from Edi Adapter" {
+        "generateIncomingMessage should handle an error response from Edi Adapter" {
             ediAdapterClient.givenPostMessageResponse(
                 Left(
                     ErrorMessage(
@@ -76,12 +76,12 @@ class IncomingMessageProducerSpec : StringSpec(
             )
 
             shouldNotThrowAny {
-                producer.produceIncomingMessage()
+                generator.generateIncomingMessage()
             }
         }
 
-        "processMessage should send XML with attachments" {
-            producer.produceIncomingMessage(
+        "generateIncomingMessage should send XML with attachments" {
+            generator.generateIncomingMessage(
                 addAttachments = true,
                 attachmentsCount = 2
             )
@@ -97,8 +97,8 @@ class IncomingMessageProducerSpec : StringSpec(
             businessDocument shouldContain "<Description>Testvedlegg 2</Description>"
         }
 
-        "processMessage should send XML without attachments" {
-            producer.produceIncomingMessage(
+        "generateIncomingMessage should send XML without attachments" {
+            generator.generateIncomingMessage(
                 addAttachments = false
             )
 

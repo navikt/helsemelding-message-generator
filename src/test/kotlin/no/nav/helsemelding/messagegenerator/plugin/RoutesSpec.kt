@@ -32,7 +32,7 @@ import no.nav.helsemelding.messagegenerator.config.Server
 import no.nav.helsemelding.messagegenerator.config.Topics
 import no.nav.helsemelding.messagegenerator.generator.DialogMessageGenerator
 import no.nav.helsemelding.messagegenerator.generator.FakeEdiAdapterClient
-import no.nav.helsemelding.messagegenerator.generator.IncomingMessageProducer
+import no.nav.helsemelding.messagegenerator.generator.IncomingMessageGenerator
 import no.nav.helsemelding.messagegenerator.model.SchedulerStatus
 import no.nav.helsemelding.messagegenerator.publisher.FakeDialogMessagePublisher
 import no.nav.helsemelding.messagegenerator.scheduler.SchedulerService
@@ -196,7 +196,7 @@ private fun routesTestApplication(
         configureRoutes(
             registry = PrometheusMeterRegistry(PrometheusConfig.DEFAULT),
             dialogMessageGenerator = DialogMessageGenerator(FakeDialogMessagePublisher()),
-            incomingMessageProducer = IncomingMessageProducer(
+            incomingMessageGenerator = IncomingMessageGenerator(
                 ediAdapterClient = FakeEdiAdapterClient(),
                 template = "<MsgHead></MsgHead>",
                 names = listOf("Test Person"),
@@ -248,7 +248,7 @@ private fun testSchedulerService(enableSchedulers: Boolean): SchedulerService {
         scope = scope,
         config = config,
         dialogMessageGenerator = DialogMessageGenerator(FakeDialogMessagePublisher()),
-        incomingMessageProducer = IncomingMessageProducer(
+        incomingMessageGenerator = IncomingMessageGenerator(
             ediAdapterClient = FakeEdiAdapterClient(),
             template = "<MsgHead></MsgHead>",
             names = listOf("Test Person"),

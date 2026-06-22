@@ -11,7 +11,7 @@ import io.ktor.utils.io.CancellationException
 import io.micrometer.prometheus.PrometheusMeterRegistry
 import kotlinx.coroutines.awaitCancellation
 import no.nav.helsemelding.messagegenerator.generator.DialogMessageGenerator
-import no.nav.helsemelding.messagegenerator.generator.IncomingMessageProducer
+import no.nav.helsemelding.messagegenerator.generator.IncomingMessageGenerator
 import no.nav.helsemelding.messagegenerator.plugin.configureContentNegotiation
 import no.nav.helsemelding.messagegenerator.plugin.configureMetrics
 import no.nav.helsemelding.messagegenerator.plugin.configureRoutes
@@ -30,13 +30,13 @@ fun main() = SuspendApp {
             val dialogMessagePublisher = DialogMessagePublisher(deps.kafkaPublisher)
             val dialogMessageGenerator = DialogMessageGenerator(dialogMessagePublisher)
 
-            val incomingMessageProducer = IncomingMessageProducer(deps.ediAdapterClient)
+            val incomingMessageGenerator = IncomingMessageGenerator(deps.ediAdapterClient)
 
             val schedulerService = SchedulerService(
                 scope = scope,
                 config = config(),
                 dialogMessageGenerator = dialogMessageGenerator,
-                incomingMessageProducer = incomingMessageProducer
+                incomingMessageGenerator = incomingMessageGenerator
             )
 
             server(
@@ -46,7 +46,7 @@ fun main() = SuspendApp {
                 module = messageGeneratorModule(
                     deps.meterRegistry,
                     dialogMessageGenerator,
-                    incomingMessageProducer,
+                    incomingMessageGenerator,
                     schedulerService
                 )
             )
@@ -62,7 +62,7 @@ fun main() = SuspendApp {
 internal fun messageGeneratorModule(
     meterRegistry: PrometheusMeterRegistry,
     dialogMessageGenerator: DialogMessageGenerator,
-    incomingMessageProducer: IncomingMessageProducer,
+    incomingMessageGenerator: IncomingMessageGenerator,
     schedulerService: SchedulerService
 ): Application.() -> Unit {
     return {
@@ -71,7 +71,7 @@ internal fun messageGeneratorModule(
         configureRoutes(
             meterRegistry,
             dialogMessageGenerator,
-            incomingMessageProducer,
+            incomingMessageGenerator,
             schedulerService
         )
     }

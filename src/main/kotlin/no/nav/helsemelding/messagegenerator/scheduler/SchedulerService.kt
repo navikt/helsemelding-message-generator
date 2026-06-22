@@ -3,13 +3,13 @@ package no.nav.helsemelding.messagegenerator.scheduler
 import kotlinx.coroutines.CoroutineScope
 import no.nav.helsemelding.messagegenerator.config.Config
 import no.nav.helsemelding.messagegenerator.generator.DialogMessageGenerator
-import no.nav.helsemelding.messagegenerator.generator.IncomingMessageProducer
+import no.nav.helsemelding.messagegenerator.generator.IncomingMessageGenerator
 
 class SchedulerService(
     scope: CoroutineScope,
     config: Config,
     dialogMessageGenerator: DialogMessageGenerator,
-    incomingMessageProducer: IncomingMessageProducer
+    incomingMessageGenerator: IncomingMessageGenerator
 ) {
     val dialogMessages = ManagedScheduler(
         name = "dialog-messages",
@@ -27,7 +27,7 @@ class SchedulerService(
         initialInterval = config.incomingMessages.interval,
         scope = scope,
         action = {
-            incomingMessageProducer.produceIncomingMessage()
+            incomingMessageGenerator.generateIncomingMessage()
         }
     )
 
