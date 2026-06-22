@@ -1,4 +1,4 @@
-package no.nav.helsemelding.messagegenerator.processor
+package no.nav.helsemelding.messagegenerator.generator
 
 import arrow.core.Either
 import arrow.core.Either.Left
@@ -26,7 +26,7 @@ import no.nav.helsemelding.messagegenerator.util.readFileToString
 import java.util.Base64
 import kotlin.uuid.Uuid
 
-class IncomingMessageProducerSpec : StringSpec(
+class IncomingMessageGeneratorSpec : StringSpec(
     {
         val template = readFileToString("templates/dialogMessage.xml")!!
 
@@ -34,21 +34,21 @@ class IncomingMessageProducerSpec : StringSpec(
         val messages = listOf("Dette er en testmelding")
 
         val ediAdapterClient = FakeEdiAdapterClient()
-        val producer = IncomingMessageProducer(
+        val generator = IncomingMessageGenerator(
             ediAdapterClient = ediAdapterClient,
             template = template,
             names = names,
             messages = messages
         )
 
-        "processMessage should send correct XML to Edi Adapter" {
+        "generateIncomingMessage should send correct XML to Edi Adapter" {
             val metadata = Metadata(
                 id = Uuid.random(),
                 location = "https://example.com/messages/${Uuid.random()}"
             )
             ediAdapterClient.givenPostMessageResponse(Right(metadata))
 
-            producer.produceIncomingMessage()
+            generator.generateIncomingMessage()
 
             val request = ediAdapterClient.getPostMessageRequest()
             request shouldNotBe null
@@ -64,7 +64,7 @@ class IncomingMessageProducerSpec : StringSpec(
             businessDocument shouldNotContain "<MsgId>{messageId}</MsgId>"
         }
 
-        "processMessage should handle an error response from Edi Adapter" {
+        "generateIncomingMessage should handle an error response from Edi Adapter" {
             ediAdapterClient.givenPostMessageResponse(
                 Left(
                     ErrorMessage(
@@ -76,19 +76,12 @@ class IncomingMessageProducerSpec : StringSpec(
             )
 
             shouldNotThrowAny {
-                producer.produceIncomingMessage()
+                generator.generateIncomingMessage()
             }
         }
 
-        "processMessage should send XML with attachments" {
-            val metadata = Metadata(
-                id = Uuid.random(),
-                location = "https://example.com/messages/${Uuid.random()}"
-            )
-
-            ediAdapterClient.givenPostMessageResponse(Right(metadata))
-
-            producer.produceIncomingMessage(
+        "generateIncomingMessage should send XML with attachments" {
+            generator.generateIncomingMessage(
                 addAttachments = true,
                 attachmentsCount = 2
             )
@@ -104,15 +97,8 @@ class IncomingMessageProducerSpec : StringSpec(
             businessDocument shouldContain "<Description>Testvedlegg 2</Description>"
         }
 
-        "processMessage should send XML without attachments" {
-            val metadata = Metadata(
-                id = Uuid.random(),
-                location = "https://example.com/messages/${Uuid.random()}"
-            )
-
-            ediAdapterClient.givenPostMessageResponse(Right(metadata))
-
-            producer.produceIncomingMessage(
+        "generateIncomingMessage should send XML without attachments" {
+            generator.generateIncomingMessage(
                 addAttachments = false
             )
 
@@ -130,7 +116,12 @@ class IncomingMessageProducerSpec : StringSpec(
 )
 
 class FakeEdiAdapterClient : EdiAdapterClient {
-    private var postMessageResponse: Either<ErrorMessage, Metadata>? = null
+    private var postMessageResponse: Either<ErrorMessage, Metadata> = Right(
+        Metadata(
+            id = Uuid.random(),
+            location = "https://example.com/messages/${Uuid.random()}"
+        )
+    )
     private var postMessageRequest: PostMessageRequest? = null
 
     val errorMessage404 = ErrorMessage(
@@ -147,7 +138,7 @@ class FakeEdiAdapterClient : EdiAdapterClient {
 
     override suspend fun postMessage(postMessagesRequest: PostMessageRequest): Either<ErrorMessage, Metadata> {
         this.postMessageRequest = postMessagesRequest
-        return postMessageResponse ?: error("Post message response not set")
+        return postMessageResponse
     }
 
     override suspend fun getMessageStatus(id: Uuid): Either<ErrorMessage, List<StatusInfo>> = Left(errorMessage404)
@@ -169,10 +160,12 @@ class FakeEdiAdapterClient : EdiAdapterClient {
     override suspend fun getMessages(getMessagesRequest: GetMessagesRequest): Either<ErrorMessage, List<Message>> = Left(errorMessage404)
 
     @ExperimentalEdiAdapterApi
-    override suspend fun postMshConfiguration(postMshConfigurationRequest: PostMshConfigurationRequest): Either<ErrorMessage, Unit> = Left(errorMessage404)
+    override suspend fun postMshConfiguration(postMshConfigurationRequest: PostMshConfigurationRequest): Either<ErrorMessage, Unit> =
+        Left(errorMessage404)
 
     @ExperimentalEdiAdapterApi
-    override suspend fun getNotices(getNoticesRequest: GetNoticesRequest): Either<ErrorMessage, List<Notice>> = Left(errorMessage404)
+    override suspend fun getNotices(getNoticesRequest: GetNoticesRequest): Either<ErrorMessage, List<Notice>> =
+        Left(errorMessage404)
 
     override fun close() {}
 }

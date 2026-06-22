@@ -13,7 +13,8 @@ import io.ktor.server.routing.routing
 import io.micrometer.prometheus.PrometheusMeterRegistry
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
-import no.nav.helsemelding.messagegenerator.processor.DialogMessageProcessor
+import no.nav.helsemelding.messagegenerator.generator.DialogMessageGenerator
+import no.nav.helsemelding.messagegenerator.generator.IncomingMessageGenerator
 import no.nav.helsemelding.messagegenerator.scheduler.SchedulerService
 import kotlin.time.Duration.Companion.seconds
 
@@ -21,12 +22,17 @@ private val log = KotlinLogging.logger {}
 
 fun Application.configureRoutes(
     registry: PrometheusMeterRegistry,
-    dialogMessageProcessor: DialogMessageProcessor,
+    dialogMessageGenerator: DialogMessageGenerator,
+    incomingMessageGenerator: IncomingMessageGenerator,
     schedulerService: SchedulerService
 ) {
     routing {
         internalRoutes(registry)
-        externalRoutes(dialogMessageProcessor, schedulerService)
+        externalRoutes(
+            dialogMessageGenerator,
+            incomingMessageGenerator,
+            schedulerService
+        )
     }
 }
 
@@ -45,23 +51,40 @@ fun Route.internalRoutes(registry: PrometheusMeterRegistry) {
 }
 
 fun Route.externalRoutes(
-    dialogMessageProcessor: DialogMessageProcessor,
+    dialogMessageGenerator: DialogMessageGenerator,
+    incomingMessageGenerator: IncomingMessageGenerator,
     schedulerService: SchedulerService
 ) {
-    get("/generate-messages") {
-        var count = call.request.queryParameters["count"]?.toIntOrNull() ?: 1
-        if (count > 100) count = 100
+    route("/generate") {
+        get("/dialog-messages") {
+            var count = call.request.queryParameters["count"]?.toIntOrNull() ?: 1
+            if (count > 100) count = 100
 
-        var published = 0
-        coroutineScope {
+            var published = 0
+            coroutineScope {
+                repeat(count) {
+                    dialogMessageGenerator.generateMessages(this)
+                    published++
+                    if (it < count - 1) delay(1000)
+                }
+            }
+
+            call.respondText("Published $published dialog messages.")
+        }
+
+        get("/incoming-messages") {
+            var count = call.request.queryParameters["count"]?.toIntOrNull() ?: 1
+            if (count > 100) count = 100
+
+            var published = 0
             repeat(count) {
-                dialogMessageProcessor.processMessages(this)
+                incomingMessageGenerator.generateIncomingMessage()
                 published++
                 if (it < count - 1) delay(1000)
             }
-        }
 
-        call.respondText("Published $published dialog messages.")
+            call.respondText("Published $published incoming messages.")
+        }
     }
 
     route("/scheduler") {
