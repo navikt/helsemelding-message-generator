@@ -3,8 +3,8 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
     application
-    kotlin("jvm") version "2.1.10"
-    kotlin("plugin.serialization") version "2.1.10"
+    kotlin("jvm") version "2.4.0"
+    kotlin("plugin.serialization") version "2.4.0"
     id("io.ktor.plugin") version "3.0.3"
     id("org.jlleitschuh.gradle.ktlint") version "11.6.1"
     id("com.gradleup.shadow") version "9.2.2"
@@ -66,6 +66,7 @@ dependencies {
     implementation(libs.kotlin.kafka)
     implementation(libs.token.validation.ktor.v3)
     implementation(libs.edi.adapter.client)
+    implementation(libs.json.schema.core)
 
     testImplementation(testLibs.bundles.kotest)
     testImplementation(testLibs.kotest.assertions.arrow)

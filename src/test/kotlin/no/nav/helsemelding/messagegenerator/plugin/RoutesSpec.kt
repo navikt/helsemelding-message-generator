@@ -23,6 +23,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import no.nav.helsemelding.messagegenerator.config.Config
 import no.nav.helsemelding.messagegenerator.config.DialogMessage
+import no.nav.helsemelding.messagegenerator.config.DialogMessageJson
 import no.nav.helsemelding.messagegenerator.config.EdiAdapter
 import no.nav.helsemelding.messagegenerator.config.IncomingMessages
 import no.nav.helsemelding.messagegenerator.config.Kafka
@@ -33,6 +34,7 @@ import no.nav.helsemelding.messagegenerator.config.Topics
 import no.nav.helsemelding.messagegenerator.generator.DialogMessageGenerator
 import no.nav.helsemelding.messagegenerator.generator.FakeEdiAdapterClient
 import no.nav.helsemelding.messagegenerator.generator.IncomingMessageGenerator
+import no.nav.helsemelding.messagegenerator.generator.JsonDialogMessageGenerator
 import no.nav.helsemelding.messagegenerator.model.SchedulerStatus
 import no.nav.helsemelding.messagegenerator.publisher.FakeDialogMessagePublisher
 import no.nav.helsemelding.messagegenerator.scheduler.SchedulerService
@@ -234,6 +236,11 @@ private fun testSchedulerService(enableSchedulers: Boolean): SchedulerService {
                     topic = "dialog-topic",
                     enabled = enableSchedulers,
                     interval = 3.minutes
+                ),
+                dialogMessageJson = DialogMessageJson(
+                    topic = "dialog-json-topic",
+                    enabled = enableSchedulers,
+                    interval = 3.minutes
                 )
             )
         ),
@@ -248,6 +255,7 @@ private fun testSchedulerService(enableSchedulers: Boolean): SchedulerService {
         scope = scope,
         config = config,
         dialogMessageGenerator = DialogMessageGenerator(FakeDialogMessagePublisher()),
+        jsonDialogMessageGenerator = JsonDialogMessageGenerator(FakeDialogMessagePublisher()),
         incomingMessageGenerator = IncomingMessageGenerator(
             ediAdapterClient = FakeEdiAdapterClient(),
             template = "<MsgHead></MsgHead>",

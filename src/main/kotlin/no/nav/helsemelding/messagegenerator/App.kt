@@ -12,10 +12,12 @@ import io.micrometer.prometheus.PrometheusMeterRegistry
 import kotlinx.coroutines.awaitCancellation
 import no.nav.helsemelding.messagegenerator.generator.DialogMessageGenerator
 import no.nav.helsemelding.messagegenerator.generator.IncomingMessageGenerator
+import no.nav.helsemelding.messagegenerator.generator.JsonDialogMessageGenerator
 import no.nav.helsemelding.messagegenerator.plugin.configureContentNegotiation
 import no.nav.helsemelding.messagegenerator.plugin.configureMetrics
 import no.nav.helsemelding.messagegenerator.plugin.configureRoutes
 import no.nav.helsemelding.messagegenerator.publisher.DialogMessagePublisher
+import no.nav.helsemelding.messagegenerator.publisher.JsonDialogMessagePublisher
 import no.nav.helsemelding.messagegenerator.scheduler.SchedulerService
 import no.nav.helsemelding.messagegenerator.util.coroutineScope
 
@@ -30,12 +32,16 @@ fun main() = SuspendApp {
             val dialogMessagePublisher = DialogMessagePublisher(deps.kafkaPublisher)
             val dialogMessageGenerator = DialogMessageGenerator(dialogMessagePublisher)
 
+            val jsonDialogMessagePublisher = JsonDialogMessagePublisher(deps.jsonKafkaPublisher)
+            val jsonDialogMessageGenerator = JsonDialogMessageGenerator(jsonDialogMessagePublisher)
+
             val incomingMessageGenerator = IncomingMessageGenerator(deps.ediAdapterClient)
 
             val schedulerService = SchedulerService(
                 scope = scope,
                 config = config(),
                 dialogMessageGenerator = dialogMessageGenerator,
+                jsonDialogMessageGenerator = jsonDialogMessageGenerator,
                 incomingMessageGenerator = incomingMessageGenerator
             )
 
