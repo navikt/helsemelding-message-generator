@@ -15,6 +15,7 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import no.nav.helsemelding.messagegenerator.generator.DialogMessageGenerator
 import no.nav.helsemelding.messagegenerator.generator.IncomingMessageGenerator
+import no.nav.helsemelding.messagegenerator.generator.JsonDialogMessageGenerator
 import no.nav.helsemelding.messagegenerator.scheduler.SchedulerService
 import kotlin.time.Duration.Companion.seconds
 
@@ -23,6 +24,7 @@ private val log = KotlinLogging.logger {}
 fun Application.configureRoutes(
     registry: PrometheusMeterRegistry,
     dialogMessageGenerator: DialogMessageGenerator,
+    jsonDialogMessageGenerator: JsonDialogMessageGenerator,
     incomingMessageGenerator: IncomingMessageGenerator,
     schedulerService: SchedulerService
 ) {
@@ -30,6 +32,7 @@ fun Application.configureRoutes(
         internalRoutes(registry)
         externalRoutes(
             dialogMessageGenerator,
+            jsonDialogMessageGenerator,
             incomingMessageGenerator,
             schedulerService
         )
@@ -52,6 +55,7 @@ fun Route.internalRoutes(registry: PrometheusMeterRegistry) {
 
 fun Route.externalRoutes(
     dialogMessageGenerator: DialogMessageGenerator,
+    jsonDialogMessageGenerator: JsonDialogMessageGenerator,
     incomingMessageGenerator: IncomingMessageGenerator,
     schedulerService: SchedulerService
 ) {
@@ -70,6 +74,22 @@ fun Route.externalRoutes(
             }
 
             call.respondText("Published $published dialog messages.")
+        }
+
+        get("/json-dialog-messages") {
+            var count = call.request.queryParameters["count"]?.toIntOrNull() ?: 1
+            if (count > 100) count = 100
+
+            var published = 0
+            coroutineScope {
+                repeat(count) {
+                    jsonDialogMessageGenerator.generateMessages(this)
+                    published++
+                    if (it < count - 1) delay(1000)
+                }
+            }
+
+            call.respondText("Published $published json dialog messages.")
         }
 
         get("/incoming-messages") {
@@ -91,10 +111,12 @@ fun Route.externalRoutes(
         get("/status") {
             try {
                 val dialogStatus = schedulerService.dialogMessages.status()
+                val jsonDialogStatus = schedulerService.jsonDialogMessages.status()
                 val incomingStatus = schedulerService.incomingMessages.status()
                 call.respond(
                     mapOf(
                         "dialogMessages" to dialogStatus,
+                        "jsonDialogMessages" to jsonDialogStatus,
                         "incomingMessages" to incomingStatus
                     )
                 )
@@ -125,6 +147,30 @@ fun Route.externalRoutes(
                 schedulerService.dialogMessages.updateInterval(intervalSeconds.seconds)
 
                 call.respondText("Dialog messages scheduler interval updated to $intervalSeconds seconds.")
+            }
+        }
+
+        route("/json-dialog-messages") {
+            post("/start") {
+                schedulerService.jsonDialogMessages.start()
+                call.respondText("Json dialog messages scheduler started.")
+            }
+
+            post("/stop") {
+                schedulerService.jsonDialogMessages.stop()
+                call.respondText("Json dialog messages scheduler stopped.")
+            }
+
+            post("/interval/{intervalSeconds}") {
+                val intervalSeconds = call.parameters["intervalSeconds"]?.toLongOrNull()
+                if (intervalSeconds == null || intervalSeconds <= 0) {
+                    call.respondText("Invalid interval. Please provide a positive number of seconds.", status = HttpStatusCode.BadRequest)
+                    return@post
+                }
+
+                schedulerService.jsonDialogMessages.updateInterval(intervalSeconds.seconds)
+
+                call.respondText("Json dialog messages scheduler interval updated to $intervalSeconds seconds.")
             }
         }
 

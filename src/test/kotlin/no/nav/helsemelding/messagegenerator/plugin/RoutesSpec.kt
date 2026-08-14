@@ -57,6 +57,22 @@ class RoutesSpec : StringSpec({
         }
     }
 
+    "/generate/json-dialog-messages endpoint triggers json dialog message generation" {
+        routesTestApplication { client ->
+            val testCases = listOf(
+                "/generate/json-dialog-messages" to 1,
+                "/generate/json-dialog-messages?count=3" to 3
+            )
+
+            testCases.forEach { (urlString, messageCount) ->
+                val response = client.get(urlString)
+
+                response.status shouldBe HttpStatusCode.OK
+                response.bodyAsText() shouldBe "Published $messageCount json dialog messages."
+            }
+        }
+    }
+
     "/generate/incoming-messages endpoint triggers incoming message generation" {
         routesTestApplication { client ->
             val testCases = listOf(
@@ -88,6 +104,11 @@ class RoutesSpec : StringSpec({
             dialogMessageScheduler.enabled shouldBe true
             dialogMessageScheduler.interval shouldBe 3.minutes
 
+            val jsonDialogMessageScheduler = statusResponse["jsonDialogMessages"]
+            jsonDialogMessageScheduler.shouldNotBeNull()
+            jsonDialogMessageScheduler.enabled shouldBe true
+            jsonDialogMessageScheduler.interval shouldBe 3.minutes
+
             val incomingMessagesScheduler = statusResponse["incomingMessages"]
             incomingMessagesScheduler.shouldNotBeNull()
             incomingMessagesScheduler.enabled shouldBe true
@@ -99,6 +120,7 @@ class RoutesSpec : StringSpec({
         routesTestApplication { client ->
             val testCases = listOf(
                 listOf("/scheduler/dialog-messages/stop", "dialogMessages"),
+                listOf("/scheduler/json-dialog-messages/stop", "jsonDialogMessages"),
                 listOf("/scheduler/incoming-messages/stop", "incomingMessages")
             )
 
@@ -124,6 +146,7 @@ class RoutesSpec : StringSpec({
         routesTestApplication(enableSchedulers = false) { client ->
             val testCases = listOf(
                 listOf("/scheduler/dialog-messages/start", "dialogMessages"),
+                listOf("/scheduler/json-dialog-messages/start", "jsonDialogMessages"),
                 listOf("/scheduler/incoming-messages/start", "incomingMessages")
             )
 
@@ -149,6 +172,7 @@ class RoutesSpec : StringSpec({
         routesTestApplication { client ->
             val testCases = listOf(
                 listOf("/scheduler/dialog-messages/interval", "dialogMessages"),
+                listOf("/scheduler/json-dialog-messages/interval", "jsonDialogMessages"),
                 listOf("/scheduler/incoming-messages/interval", "incomingMessages")
             )
 
@@ -174,6 +198,8 @@ class RoutesSpec : StringSpec({
             val testCases = listOf(
                 listOf("/scheduler/dialog-messages/interval", 0),
                 listOf("/scheduler/dialog-messages/interval", -60),
+                listOf("/scheduler/json-dialog-messages/interval", 0),
+                listOf("/scheduler/json-dialog-messages/interval", -60),
                 listOf("/scheduler/incoming-messages/interval", 0),
                 listOf("/scheduler/incoming-messages/interval", -60)
             )
@@ -198,6 +224,7 @@ private fun routesTestApplication(
         configureRoutes(
             registry = PrometheusMeterRegistry(PrometheusConfig.DEFAULT),
             dialogMessageGenerator = DialogMessageGenerator(FakeDialogMessagePublisher()),
+            jsonDialogMessageGenerator = JsonDialogMessageGenerator(FakeDialogMessagePublisher()),
             incomingMessageGenerator = IncomingMessageGenerator(
                 ediAdapterClient = FakeEdiAdapterClient(),
                 template = "<MsgHead></MsgHead>",

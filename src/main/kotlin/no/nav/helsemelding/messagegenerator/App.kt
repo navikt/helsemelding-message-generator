@@ -52,6 +52,7 @@ fun main() = SuspendApp {
                 module = messageGeneratorModule(
                     deps.meterRegistry,
                     dialogMessageGenerator,
+                    jsonDialogMessageGenerator,
                     incomingMessageGenerator,
                     schedulerService
                 )
@@ -68,6 +69,7 @@ fun main() = SuspendApp {
 internal fun messageGeneratorModule(
     meterRegistry: PrometheusMeterRegistry,
     dialogMessageGenerator: DialogMessageGenerator,
+    jsonDialogMessageGenerator: JsonDialogMessageGenerator,
     incomingMessageGenerator: IncomingMessageGenerator,
     schedulerService: SchedulerService
 ): Application.() -> Unit {
@@ -77,6 +79,7 @@ internal fun messageGeneratorModule(
         configureRoutes(
             meterRegistry,
             dialogMessageGenerator,
+            jsonDialogMessageGenerator,
             incomingMessageGenerator,
             schedulerService
         )
