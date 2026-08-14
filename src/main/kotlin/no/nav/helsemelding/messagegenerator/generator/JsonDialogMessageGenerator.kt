@@ -12,7 +12,6 @@ import no.nav.helsemelding.jsonschema.core.model.OutgoingDialogMessageType
 import no.nav.helsemelding.messagegenerator.publisher.MessagePublisher
 import no.nav.helsemelding.messagegenerator.util.readFileToList
 import no.nav.helsemelding.messagegenerator.util.readFileToString
-import org.apache.kafka.clients.producer.RecordMetadata
 import kotlin.random.Random
 import kotlin.uuid.Uuid
 
@@ -26,8 +25,8 @@ class JsonDialogMessageGenerator(
     private val json = Json { encodeDefaults = true }
 
     fun generateMessages(scope: CoroutineScope) =
-        flowOf(buildMessage())
-            .onEach(::publishMessage)
+        flowOf(Unit)
+            .onEach { publishNext() }
             .flowOn(Dispatchers.IO)
             .launchIn(scope)
 
@@ -43,6 +42,14 @@ class JsonDialogMessageGenerator(
             attachment = if (Random.nextBoolean()) attachment else null
         )
 
-    private suspend fun publishMessage(message: OutgoingDialogMessage): Result<RecordMetadata> =
-        messagePublisher.publish(message.id, json.encodeToString(OutgoingDialogMessage.serializer(), message))
+    internal suspend fun publishNext() {
+        val uuid = Uuid.random().toString()
+        val validJson = json.encodeToString(OutgoingDialogMessage.serializer(), buildMessage())
+        when (Random.nextInt(10)) {
+            0 -> messagePublisher.publish("not-a-valid-uuid", validJson)
+            1 -> messagePublisher.publish(uuid, "{ invalid json {{{")
+            2 -> messagePublisher.publish(uuid, """{"foo": "bar"}""")
+            else -> messagePublisher.publish(uuid, validJson)
+        }
+    }
 }
