@@ -11,14 +11,17 @@ import no.nav.helsemelding.jsonschema.core.model.OutgoingDialogMessage
 import no.nav.helsemelding.jsonschema.core.model.OutgoingDialogMessageType
 import no.nav.helsemelding.messagegenerator.publisher.MessagePublisher
 import no.nav.helsemelding.messagegenerator.util.readFileToList
+import no.nav.helsemelding.messagegenerator.util.readFileToString
 import org.apache.kafka.clients.producer.RecordMetadata
+import kotlin.random.Random
 import kotlin.uuid.Uuid
 
 class JsonDialogMessageGenerator(
     private val messagePublisher: MessagePublisher,
     private val messages: List<String> = readFileToList("messages.txt").orEmpty(),
     private val patientIdents: List<String> = readFileToList("patient-idents.txt").orEmpty(),
-    private val providerIds: List<String> = readFileToList("provider-ids.txt").orEmpty()
+    private val providerIds: List<String> = readFileToList("provider-ids.txt").orEmpty(),
+    private val attachment: String? = readFileToString("attachment.txt")
 ) {
     private val json = Json { encodeDefaults = true }
 
@@ -37,7 +40,7 @@ class JsonDialogMessageGenerator(
             conversationReference = null,
             type = OutgoingDialogMessageType.entries.random(),
             message = messages.random(),
-            attachment = null
+            attachment = if (Random.nextBoolean()) attachment else null
         )
 
     private suspend fun publishMessage(message: OutgoingDialogMessage): Result<RecordMetadata> =
