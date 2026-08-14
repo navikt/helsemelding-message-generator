@@ -28,7 +28,7 @@ class JsonDialogMessageGenerator(
             .flowOn(Dispatchers.IO)
             .launchIn(scope)
 
-    private fun buildMessage() =
+    internal fun buildMessage() =
         OutgoingDialogMessage(
             version = 1,
             id = Uuid.random().toString(),
