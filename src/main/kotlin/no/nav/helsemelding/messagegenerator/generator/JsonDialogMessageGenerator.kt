@@ -20,7 +20,8 @@ class JsonDialogMessageGenerator(
     private val messages: List<String> = readFileToList("messages.txt").orEmpty(),
     private val patientIdents: List<String> = readFileToList("patient-idents.txt").orEmpty(),
     private val providerIds: List<String> = readFileToList("provider-ids.txt").orEmpty(),
-    private val attachment: String? = readFileToString("attachment.txt")
+    private val attachment: String? = readFileToString("attachment.txt"),
+    private val random: Random = Random.Default
 ) {
     private val json = Json { encodeDefaults = true }
 
@@ -39,13 +40,13 @@ class JsonDialogMessageGenerator(
             conversationReference = null,
             type = OutgoingDialogMessageType.entries.random(),
             message = messages.random(),
-            attachment = if (Random.nextBoolean()) attachment else null
+            attachment = if (random.nextBoolean()) attachment else null
         )
 
     internal suspend fun publishNext() {
         val uuid = Uuid.random().toString()
         val validJson = json.encodeToString(OutgoingDialogMessage.serializer(), buildMessage())
-        when (Random.nextInt(10)) {
+        when (random.nextInt(10)) {
             0 -> messagePublisher.publish("not-a-valid-uuid", validJson)
             1 -> messagePublisher.publish(uuid, "{ invalid json {{{")
             2 -> messagePublisher.publish(uuid, """{"foo": "bar"}""")
