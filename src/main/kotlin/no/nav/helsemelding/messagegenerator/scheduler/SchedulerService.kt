@@ -13,10 +13,10 @@ class SchedulerService(
     jsonDialogMessageGenerator: JsonDialogMessageGenerator,
     incomingMessageGenerator: IncomingMessageGenerator
 ) {
-    val dialogMessages = ManagedScheduler(
-        name = "dialog-messages",
-        initialEnabled = config.kafka.topics.dialogMessage.enabled,
-        initialInterval = config.kafka.topics.dialogMessage.interval,
+    val xmlDialogMessages = ManagedScheduler(
+        name = "xml-dialog-messages",
+        initialEnabled = config.kafka.topics.dialogMessageXml.enabled,
+        initialInterval = config.kafka.topics.dialogMessageXml.interval,
         scope = scope,
         action = {
             xmlDialogMessageGenerator.generateMessages(scope)
@@ -44,7 +44,7 @@ class SchedulerService(
     )
 
     suspend fun init() {
-        dialogMessages.init()
+        xmlDialogMessages.init()
         jsonDialogMessages.init()
         incomingMessages.init()
     }

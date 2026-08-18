@@ -6,8 +6,12 @@ An application with scheduler(s) for producing fake outgoing messages in dev to 
 
 ## Outgoing dialog messages (JSON)
 
-JSON messages are published to `helsemelding.dialog.out.json` and correspond to the `OutgoingDialogMessage` schema
-from `helsemelding-json-schema`.
+JSON messages are published to `helsemelding.dialog.out.json` and conform to the `OutgoingDialogMessage` schema
+from `helsemelding-json-schema`. Data is loaded from the following resource files:
+- `messages.txt` — message texts
+- `patient-idents.txt` — patient identifiers
+- `provider-ids.txt` — provider UUIDs
+
 ### Types of JSON dialog messages published
 
 Each message is randomly one of the following:
@@ -74,7 +78,7 @@ curl https://<host>/scheduler/status
 Example response:
 ```json
 {
-    "dialogMessages": {
+    "xmlDialogMessages": {
         "enabled": false,
         "interval": "PT5M",
         "lastRunAt": null

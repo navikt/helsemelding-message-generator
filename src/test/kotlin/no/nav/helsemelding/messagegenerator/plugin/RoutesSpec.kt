@@ -22,14 +22,13 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import no.nav.helsemelding.messagegenerator.config.Config
-import no.nav.helsemelding.messagegenerator.config.DialogMessage
-import no.nav.helsemelding.messagegenerator.config.DialogMessageJson
 import no.nav.helsemelding.messagegenerator.config.EdiAdapter
 import no.nav.helsemelding.messagegenerator.config.IncomingMessages
 import no.nav.helsemelding.messagegenerator.config.Kafka
 import no.nav.helsemelding.messagegenerator.config.Port
 import no.nav.helsemelding.messagegenerator.config.Scope
 import no.nav.helsemelding.messagegenerator.config.Server
+import no.nav.helsemelding.messagegenerator.config.TopicConfig
 import no.nav.helsemelding.messagegenerator.config.Topics
 import no.nav.helsemelding.messagegenerator.generator.FakeEdiAdapterClient
 import no.nav.helsemelding.messagegenerator.generator.IncomingMessageGenerator
@@ -99,7 +98,7 @@ class RoutesSpec : StringSpec({
 
             val statusResponse = response.body<Map<String, SchedulerStatus>>()
 
-            val dialogMessageScheduler = statusResponse["dialogMessages"]
+            val dialogMessageScheduler = statusResponse["xmlDialogMessages"]
             dialogMessageScheduler.shouldNotBeNull()
             dialogMessageScheduler.enabled shouldBe true
             dialogMessageScheduler.interval shouldBe 3.minutes
@@ -119,7 +118,7 @@ class RoutesSpec : StringSpec({
     "/stop endpoints disable schedulers" {
         routesTestApplication { client ->
             val testCases = listOf(
-                listOf("/scheduler/xml-dialog-messages/stop", "dialogMessages"),
+                listOf("/scheduler/xml-dialog-messages/stop", "xmlDialogMessages"),
                 listOf("/scheduler/json-dialog-messages/stop", "jsonDialogMessages"),
                 listOf("/scheduler/incoming-messages/stop", "incomingMessages")
             )
@@ -145,7 +144,7 @@ class RoutesSpec : StringSpec({
     "/start endpoints enable schedulers" {
         routesTestApplication(enableSchedulers = false) { client ->
             val testCases = listOf(
-                listOf("/scheduler/xml-dialog-messages/start", "dialogMessages"),
+                listOf("/scheduler/xml-dialog-messages/start", "xmlDialogMessages"),
                 listOf("/scheduler/json-dialog-messages/start", "jsonDialogMessages"),
                 listOf("/scheduler/incoming-messages/start", "incomingMessages")
             )
@@ -171,7 +170,7 @@ class RoutesSpec : StringSpec({
     "/interval/{intervalSeconds} endpoint changes interval for scheduler" {
         routesTestApplication { client ->
             val testCases = listOf(
-                listOf("/scheduler/xml-dialog-messages/interval", "dialogMessages"),
+                listOf("/scheduler/xml-dialog-messages/interval", "xmlDialogMessages"),
                 listOf("/scheduler/json-dialog-messages/interval", "jsonDialogMessages"),
                 listOf("/scheduler/incoming-messages/interval", "incomingMessages")
             )
@@ -259,13 +258,13 @@ private fun testSchedulerService(enableSchedulers: Boolean): SchedulerService {
             truststoreLocation = Kafka.TruststoreLocation("/tmp/truststore.jks"),
             truststorePassword = Masked("secret"),
             topics = Topics(
-                dialogMessage = DialogMessage(
-                    topic = "dialog-topic",
+                dialogMessageXml = TopicConfig(
+                    topic = "dialog-topic-xml",
                     enabled = enableSchedulers,
                     interval = 3.minutes
                 ),
-                dialogMessageJson = DialogMessageJson(
-                    topic = "dialog-json-topic",
+                dialogMessageJson = TopicConfig(
+                    topic = "dialog-topic-json",
                     enabled = enableSchedulers,
                     interval = 3.minutes
                 )

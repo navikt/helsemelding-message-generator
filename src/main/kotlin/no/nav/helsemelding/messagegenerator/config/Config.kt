@@ -83,17 +83,11 @@ data class Kafka(
 }
 
 data class Topics(
-    val dialogMessage: DialogMessage,
-    val dialogMessageJson: DialogMessageJson
+    val dialogMessageXml: TopicConfig,
+    val dialogMessageJson: TopicConfig
 )
 
-data class DialogMessage(
-    val topic: String,
-    val enabled: Boolean,
-    val interval: Duration
-)
-
-data class DialogMessageJson(
+data class TopicConfig(
     val topic: String,
     val enabled: Boolean,
     val interval: Duration

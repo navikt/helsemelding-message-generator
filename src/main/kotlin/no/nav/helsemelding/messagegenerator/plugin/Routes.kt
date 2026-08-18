@@ -110,12 +110,12 @@ fun Route.externalRoutes(
     route("/scheduler") {
         get("/status") {
             try {
-                val dialogStatus = schedulerService.dialogMessages.status()
+                val xmlDialogStatus = schedulerService.xmlDialogMessages.status()
                 val jsonDialogStatus = schedulerService.jsonDialogMessages.status()
                 val incomingStatus = schedulerService.incomingMessages.status()
                 call.respond(
                     mapOf(
-                        "dialogMessages" to dialogStatus,
+                        "xmlDialogMessages" to xmlDialogStatus,
                         "jsonDialogMessages" to jsonDialogStatus,
                         "incomingMessages" to incomingStatus
                     )
@@ -128,12 +128,12 @@ fun Route.externalRoutes(
 
         route("/xml-dialog-messages") {
             post("/start") {
-                schedulerService.dialogMessages.start()
+                schedulerService.xmlDialogMessages.start()
                 call.respondText("Dialog messages scheduler started.")
             }
 
             post("/stop") {
-                schedulerService.dialogMessages.stop()
+                schedulerService.xmlDialogMessages.stop()
                 call.respondText("Dialog messages scheduler stopped.")
             }
 
@@ -144,7 +144,7 @@ fun Route.externalRoutes(
                     return@post
                 }
 
-                schedulerService.dialogMessages.updateInterval(intervalSeconds.seconds)
+                schedulerService.xmlDialogMessages.updateInterval(intervalSeconds.seconds)
 
                 call.respondText("Dialog messages scheduler interval updated to $intervalSeconds seconds.")
             }

@@ -25,12 +25,12 @@ class XmlDialogMessagePublisher(
         .publishScope {
             publishCatching(toProducerRecord(referenceId, message))
         }
-        .onSuccess { log.info { "Published message with reference id: $referenceId to topic: ${kafka.dialogMessage.topic}" } }
+        .onSuccess { log.info { "Published message with reference id: $referenceId to topic: ${kafka.dialogMessageXml.topic}" } }
         .onFailure { t -> log.error { "Failed to publish message with reference id: $referenceId: ${t.stackTraceToString()}" } }
 
     private fun toProducerRecord(referenceId: String?, message: String) =
         ProducerRecord(
-            kafka.dialogMessage.topic,
+            kafka.dialogMessageXml.topic,
             referenceId,
             message.toByteArray()
         )
