@@ -20,14 +20,25 @@ class JsonDialogMessagePublisher(
     override suspend fun publish(
         referenceId: String?,
         message: String
+    ): Result<RecordMetadata> = publishRecord(referenceId, message, includeSourceSystemHeader = true)
+
+    override suspend fun publishWithoutHeader(
+        referenceId: String?,
+        message: String
+    ): Result<RecordMetadata> = publishRecord(referenceId, message, includeSourceSystemHeader = false)
+
+    private suspend fun publishRecord(
+        referenceId: String?,
+        message: String,
+        includeSourceSystemHeader: Boolean
     ): Result<RecordMetadata> = kafkaPublisher
         .publishScope {
-            publishCatching(toProducerRecord(referenceId, message))
+            publishCatching(toProducerRecord(referenceId, message, includeSourceSystemHeader))
         }
         .onSuccess { log.info { "Published JSON message with reference id: $referenceId to topic: ${kafka.dialogMessageJson.topic}" } }
         .onFailure { t -> log.error { "Failed to publish JSON message with reference id: $referenceId: ${t.stackTraceToString()}" } }
 
-    private fun toProducerRecord(referenceId: String?, message: String) =
+    private fun toProducerRecord(referenceId: String?, message: String, includeSourceSystemHeader: Boolean) =
         ProducerRecord<String?, String>(
             kafka.dialogMessageJson.topic,
             null,
@@ -35,6 +46,6 @@ class JsonDialogMessagePublisher(
             referenceId,
             message
         ).also { record ->
-            record.headers().add(RecordHeader(SOURCE_SYSTEM_HEADER, SOURCE_SYSTEM.toByteArray()))
+            if (includeSourceSystemHeader) record.headers().add(RecordHeader(SOURCE_SYSTEM_HEADER, SOURCE_SYSTEM.toByteArray()))
         }
 }

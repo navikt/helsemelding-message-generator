@@ -10,6 +10,7 @@ private val log = KotlinLogging.logger {}
 
 interface MessagePublisher {
     suspend fun publish(referenceId: String?, message: String): Result<RecordMetadata>
+    suspend fun publishWithoutHeader(referenceId: String?, message: String): Result<RecordMetadata> = publish(referenceId, message)
 }
 
 class DialogMessagePublisher(

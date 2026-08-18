@@ -49,6 +49,7 @@ class JsonDialogMessageGenerator(
             0 -> messagePublisher.publish("not-a-valid-uuid", validJson)
             1 -> messagePublisher.publish(uuid, "{ invalid json {{{")
             2 -> messagePublisher.publish(uuid, """{"foo": "bar"}""")
+            3 -> messagePublisher.publishWithoutHeader(uuid, validJson)
             else -> messagePublisher.publish(uuid, validJson)
         }
     }

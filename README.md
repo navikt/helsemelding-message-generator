@@ -14,10 +14,11 @@ Each message is randomly one of the following:
 
 | Outcome | Probability | Description |
 |---|---|---|
-| Valid message | 70% | Valid `OutgoingDialogMessage` with valid UUID key |
+| Valid message | 60% | Valid `OutgoingDialogMessage` with valid UUID key and `sourceSystem` header |
 | Invalid key | 10% | Valid JSON body, but key is not a UUID |
 | Invalid JSON | 10% | Key is valid UUID, body is not valid JSON |
 | Invalid structure | 10% | Key is valid UUID, body is valid JSON but not `OutgoingDialogMessage` |
+| Missing header | 10% | Key and body are valid, but `sourceSystem` header is not set |
 
 Messages include an attachment with 50% probability.
 
