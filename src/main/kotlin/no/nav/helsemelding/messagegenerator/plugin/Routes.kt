@@ -13,9 +13,9 @@ import io.ktor.server.routing.routing
 import io.micrometer.prometheus.PrometheusMeterRegistry
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
-import no.nav.helsemelding.messagegenerator.generator.DialogMessageGenerator
 import no.nav.helsemelding.messagegenerator.generator.IncomingMessageGenerator
 import no.nav.helsemelding.messagegenerator.generator.JsonDialogMessageGenerator
+import no.nav.helsemelding.messagegenerator.generator.XmlDialogMessageGenerator
 import no.nav.helsemelding.messagegenerator.scheduler.SchedulerService
 import kotlin.time.Duration.Companion.seconds
 
@@ -23,7 +23,7 @@ private val log = KotlinLogging.logger {}
 
 fun Application.configureRoutes(
     registry: PrometheusMeterRegistry,
-    dialogMessageGenerator: DialogMessageGenerator,
+    xmlDialogMessageGenerator: XmlDialogMessageGenerator,
     jsonDialogMessageGenerator: JsonDialogMessageGenerator,
     incomingMessageGenerator: IncomingMessageGenerator,
     schedulerService: SchedulerService
@@ -31,7 +31,7 @@ fun Application.configureRoutes(
     routing {
         internalRoutes(registry)
         externalRoutes(
-            dialogMessageGenerator,
+            xmlDialogMessageGenerator,
             jsonDialogMessageGenerator,
             incomingMessageGenerator,
             schedulerService
@@ -54,20 +54,20 @@ fun Route.internalRoutes(registry: PrometheusMeterRegistry) {
 }
 
 fun Route.externalRoutes(
-    dialogMessageGenerator: DialogMessageGenerator,
+    xmlDialogMessageGenerator: XmlDialogMessageGenerator,
     jsonDialogMessageGenerator: JsonDialogMessageGenerator,
     incomingMessageGenerator: IncomingMessageGenerator,
     schedulerService: SchedulerService
 ) {
     route("/generate") {
-        get("/dialog-messages") {
+        get("/xml-dialog-messages") {
             var count = call.request.queryParameters["count"]?.toIntOrNull() ?: 1
             if (count > 100) count = 100
 
             var published = 0
             coroutineScope {
                 repeat(count) {
-                    dialogMessageGenerator.generateMessages(this)
+                    xmlDialogMessageGenerator.generateMessages(this)
                     published++
                     if (it < count - 1) delay(1000)
                 }
@@ -126,7 +126,7 @@ fun Route.externalRoutes(
             }
         }
 
-        route("/dialog-messages") {
+        route("/xml-dialog-messages") {
             post("/start") {
                 schedulerService.dialogMessages.start()
                 call.respondText("Dialog messages scheduler started.")

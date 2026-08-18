@@ -104,9 +104,9 @@ Example response:
 
 | Endpoint | Description |
 |---|---|
-| `POST /scheduler/dialog-messages/start` | Enable XML message generation |
-| `POST /scheduler/dialog-messages/stop` | Disable XML message generation |
-| `POST /scheduler/dialog-messages/interval/{seconds}` | Update interval (positive integer) |
+| `POST /scheduler/xml-dialog-messages/start` | Enable XML message generation |
+| `POST /scheduler/xml-dialog-messages/stop` | Disable XML message generation |
+| `POST /scheduler/xml-dialog-messages/interval/{seconds}` | Update interval (positive integer) |
 
 ### Incoming message scheduler
 
@@ -125,6 +125,6 @@ Messages are generated with 1 second interval.
 | Endpoint | Description |
 |---|---|
 | `GET /generate/json-dialog-messages?count={count}` | Generate JSON dialog messages |
-| `GET /generate/dialog-messages?count={count}` | Generate XML dialog messages |
+| `GET /generate/xml-dialog-messages?count={count}` | Generate XML dialog messages |
 | `GET /generate/incoming-messages?count={count}` | Generate incoming messages |
 

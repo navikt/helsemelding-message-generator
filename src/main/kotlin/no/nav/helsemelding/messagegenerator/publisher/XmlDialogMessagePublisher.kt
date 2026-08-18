@@ -13,7 +13,7 @@ interface MessagePublisher {
     suspend fun publishWithoutHeader(referenceId: String?, message: String): Result<RecordMetadata> = publish(referenceId, message)
 }
 
-class DialogMessagePublisher(
+class XmlDialogMessagePublisher(
     private val kafkaPublisher: KafkaPublisher<String?, ByteArray>
 ) : MessagePublisher {
     private val kafka = config().kafka.topics
