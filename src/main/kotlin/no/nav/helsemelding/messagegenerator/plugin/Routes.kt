@@ -73,7 +73,7 @@ fun Route.externalRoutes(
                 }
             }
 
-            call.respondText("Published $published dialog messages.")
+            call.respondText("Published $published xml dialog messages.")
         }
 
         get("/json-dialog-messages") {
@@ -129,12 +129,12 @@ fun Route.externalRoutes(
         route("/xml-dialog-messages") {
             post("/start") {
                 schedulerService.xmlDialogMessages.start()
-                call.respondText("Dialog messages scheduler started.")
+                call.respondText("XML dialog messages scheduler started.")
             }
 
             post("/stop") {
                 schedulerService.xmlDialogMessages.stop()
-                call.respondText("Dialog messages scheduler stopped.")
+                call.respondText("XML dialog messages scheduler stopped.")
             }
 
             post("/interval/{intervalSeconds}") {
@@ -146,7 +146,7 @@ fun Route.externalRoutes(
 
                 schedulerService.xmlDialogMessages.updateInterval(intervalSeconds.seconds)
 
-                call.respondText("Dialog messages scheduler interval updated to $intervalSeconds seconds.")
+                call.respondText("XML dialog messages scheduler interval updated to $intervalSeconds seconds.")
             }
         }
 

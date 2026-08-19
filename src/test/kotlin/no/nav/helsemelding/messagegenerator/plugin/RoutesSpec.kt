@@ -51,7 +51,7 @@ class RoutesSpec : StringSpec({
                 val response = client.get(urlString)
 
                 response.status shouldBe HttpStatusCode.OK
-                response.bodyAsText() shouldBe "Published $messageCount dialog messages."
+                response.bodyAsText() shouldBe "Published $messageCount xml dialog messages."
             }
         }
     }
