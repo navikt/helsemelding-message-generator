@@ -18,6 +18,7 @@ private val log = KotlinLogging.logger {}
 data class Dependencies(
     val meterRegistry: PrometheusMeterRegistry,
     val kafkaPublisher: KafkaPublisher<String?, ByteArray>,
+    val jsonKafkaPublisher: KafkaPublisher<String?, String>,
     val ediAdapterClient: EdiAdapterClient
 )
 
@@ -36,16 +37,23 @@ internal suspend fun ResourceScope.ediAdapterClient(ediAdapter: EdiAdapter): Edi
         p.close().also { log.info { "Closed Edi Adapter Client" } }
     }
 
+internal suspend fun ResourceScope.jsonKafkaPublisher(kafka: Kafka): KafkaPublisher<String?, String> =
+    install({ KafkaPublisher(kafka.toJsonPublisherSettings()) }) { p, _: ExitCase ->
+        p.close().also { log.info { "Closed JSON kafka publisher" } }
+    }
+
 suspend fun ResourceScope.dependencies(): Dependencies = awaitAll {
     val config = config()
 
     val metricsRegistry = async { metricsRegistry() }
     val kafkaPublisher = async { kafkaPublisher(config.kafka) }
+    val jsonKafkaPublisher = async { jsonKafkaPublisher(config.kafka) }
     val ediAdapterClient = async { ediAdapterClient(config.ediAdapter) }
 
     Dependencies(
         metricsRegistry.await(),
         kafkaPublisher.await(),
+        jsonKafkaPublisher.await(),
         ediAdapterClient.await()
     )
 }

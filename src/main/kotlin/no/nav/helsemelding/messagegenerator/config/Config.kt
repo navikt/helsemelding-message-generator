@@ -62,6 +62,14 @@ data class Kafka(
             properties = toProperties()
         )
 
+    fun toJsonPublisherSettings(): PublisherSettings<String?, String> =
+        PublisherSettings(
+            bootstrapServers = bootstrapServers,
+            keySerializer = StringSerializer(),
+            valueSerializer = StringSerializer(),
+            properties = toProperties()
+        )
+
     private fun toProperties() = Properties()
         .apply {
             put(securityProtocolConfig, securityProtocol.value)
@@ -75,10 +83,11 @@ data class Kafka(
 }
 
 data class Topics(
-    val dialogMessage: DialogMessage
+    val dialogMessageXml: TopicConfig,
+    val dialogMessageJson: TopicConfig
 )
 
-data class DialogMessage(
+data class TopicConfig(
     val topic: String,
     val enabled: Boolean,
     val interval: Duration

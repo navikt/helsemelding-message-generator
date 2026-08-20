@@ -2,22 +2,34 @@ package no.nav.helsemelding.messagegenerator.scheduler
 
 import kotlinx.coroutines.CoroutineScope
 import no.nav.helsemelding.messagegenerator.config.Config
-import no.nav.helsemelding.messagegenerator.generator.DialogMessageGenerator
 import no.nav.helsemelding.messagegenerator.generator.IncomingMessageGenerator
+import no.nav.helsemelding.messagegenerator.generator.JsonDialogMessageGenerator
+import no.nav.helsemelding.messagegenerator.generator.XmlDialogMessageGenerator
 
 class SchedulerService(
     scope: CoroutineScope,
     config: Config,
-    dialogMessageGenerator: DialogMessageGenerator,
+    xmlDialogMessageGenerator: XmlDialogMessageGenerator,
+    jsonDialogMessageGenerator: JsonDialogMessageGenerator,
     incomingMessageGenerator: IncomingMessageGenerator
 ) {
-    val dialogMessages = ManagedScheduler(
-        name = "dialog-messages",
-        initialEnabled = config.kafka.topics.dialogMessage.enabled,
-        initialInterval = config.kafka.topics.dialogMessage.interval,
+    val xmlDialogMessages = ManagedScheduler(
+        name = "xml-dialog-messages",
+        initialEnabled = config.kafka.topics.dialogMessageXml.enabled,
+        initialInterval = config.kafka.topics.dialogMessageXml.interval,
         scope = scope,
         action = {
-            dialogMessageGenerator.generateMessages(scope)
+            xmlDialogMessageGenerator.generateMessages(scope)
+        }
+    )
+
+    val jsonDialogMessages = ManagedScheduler(
+        name = "json-dialog-messages",
+        initialEnabled = config.kafka.topics.dialogMessageJson.enabled,
+        initialInterval = config.kafka.topics.dialogMessageJson.interval,
+        scope = scope,
+        action = {
+            jsonDialogMessageGenerator.generateMessages(scope)
         }
     )
 
@@ -32,7 +44,8 @@ class SchedulerService(
     )
 
     suspend fun init() {
-        dialogMessages.init()
+        xmlDialogMessages.init()
+        jsonDialogMessages.init()
         incomingMessages.init()
     }
 }

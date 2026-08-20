@@ -22,7 +22,7 @@ const val FAGSYSTEM_HERID = "8142519"
 const val EPJ_HERID = "8142520"
 val invalidRecordKeys = listOf(null, "", "1234-abcd")
 
-class DialogMessageGenerator(
+class XmlDialogMessageGenerator(
     private val messagePublisher: MessagePublisher,
     private val template: String = readFileToString("templates/dialogMessage.xml") ?: "",
     private val names: List<String> = readFileToList("names.txt").orEmpty(),

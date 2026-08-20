@@ -5,15 +5,15 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import no.nav.helsemelding.messagegenerator.config
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.apache.kafka.clients.producer.RecordMetadata
-import org.apache.kafka.common.TopicPartition
 
 private val log = KotlinLogging.logger {}
 
 interface MessagePublisher {
     suspend fun publish(referenceId: String?, message: String): Result<RecordMetadata>
+    suspend fun publishWithoutHeader(referenceId: String?, message: String): Result<RecordMetadata> = publish(referenceId, message)
 }
 
-class DialogMessagePublisher(
+class XmlDialogMessagePublisher(
     private val kafkaPublisher: KafkaPublisher<String?, ByteArray>
 ) : MessagePublisher {
     private val kafka = config().kafka.topics
@@ -25,33 +25,13 @@ class DialogMessagePublisher(
         .publishScope {
             publishCatching(toProducerRecord(referenceId, message))
         }
-        .onSuccess { log.info { "Published message with reference id: $referenceId to topic: ${kafka.dialogMessage.topic}" } }
+        .onSuccess { log.info { "Published message with reference id: $referenceId to topic: ${kafka.dialogMessageXml.topic}" } }
         .onFailure { t -> log.error { "Failed to publish message with reference id: $referenceId: ${t.stackTraceToString()}" } }
 
     private fun toProducerRecord(referenceId: String?, message: String) =
         ProducerRecord(
-            kafka.dialogMessage.topic,
+            kafka.dialogMessageXml.topic,
             referenceId,
             message.toByteArray()
         )
-}
-
-class FakeDialogMessagePublisher : MessagePublisher {
-    override suspend fun publish(
-        referenceId: String?,
-        message: String
-    ): Result<RecordMetadata> {
-        val metadata = RecordMetadata(
-            TopicPartition("TOPIC", 0),
-            0L,
-            0,
-            System.currentTimeMillis(),
-            referenceId.toString().length,
-            message.toByteArray().size
-        )
-
-        log.info { "Published message with reference id: $referenceId" }
-
-        return Result.success(metadata)
-    }
 }

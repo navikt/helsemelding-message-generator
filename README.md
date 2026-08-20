@@ -1,34 +1,41 @@
 # helsemelding-message-generator
 
-An application with scheduler(s) for producing fake outgoing messages in dev to the following kafka topic(s)
-(used by [helsemelding-state-service](https://github.com/navikt/helsemelding-state-service)):
-- helsemelding.dialog.out.xml (dialog message)
+An application with scheduler(s) for producing fake outgoing messages in dev to the following kafka topic(s):
+- `helsemelding.dialog.out.json` (dialog message in JSON format) — used by [helsemelding-outbound-processing-service](https://github.com/navikt/helsemelding-outbound-processing-service)
+- `helsemelding.dialog.out.xml` (dialog message in XML format) — **disabled**, kept for reference
 
-Implemented by using a template (`dialogMessage.xml`) and substituting certain properties with random values from 
-the following files:
-- `messages.txt`
-- `names.txt`
+## Outgoing dialog messages (JSON)
 
-## Types of dialog messages published
+JSON messages are published to `helsemelding.dialog.out.json` and conform to the `OutgoingDialogMessage` schema
+from `helsemelding-json-schema`. Data is loaded from the following resource files:
+- `messages.txt` — message texts
+- `patient-idents.txt` — patient identifiers
+- `provider-ids.txt` — provider UUIDs
 
-To determine what kind of dialog message is published, a random number between 1 and 11 is generated which then 
-corresponds to one the following messages:
+### Types of JSON dialog messages published
 
-| Outcome                               | Trigger condition  | Description                                              |
-|---------------------------------------|--------------------|----------------------------------------------------------|
-| Single valid dialog message           | number between 1–9 | A valid message                                          |
-| Single invalid dialog message         | number = 10        | Invalid **record key**: (`null`, `""`, or `"1234-abcd"`) |
-| Two valid dialog messages (duplicate) | number = 11        | Same **record key** used twice                           |
+Each message is randomly one of the following:
+
+| Outcome | Probability | Description |
+|---|---|---|
+| Valid message | 60% | Valid `OutgoingDialogMessage` with valid UUID key and `sourceSystem` header |
+| Invalid key | 10% | Valid JSON body, but key is not a UUID |
+| Invalid JSON | 10% | Key is valid UUID, body is not valid JSON |
+| Invalid structure | 10% | Key is valid UUID, body is valid JSON but not `OutgoingDialogMessage` |
+| Missing header | 10% | Key and body are valid, but `sourceSystem` header is not set |
+
+Messages include an attachment with 50% probability.
+
+## Outgoing dialog messages (XML) — disabled
+
+XML message generation is currently disabled (`enabled = false` in `application.conf`).
+It is implemented using a template (`dialogMessage.xml`) and substituting certain properties with random values.
+The XML is published to `helsemelding.dialog.out.xml`.
 
 ## Dialog message documentation
 
 Documentation for initial request and follow-up request can be found [here](https://sarepta.helsedir.no/standard/Dialogmelding/1.0;profile=1). 
 To read more about other types of messages see [Samhandling i pasientforløp](https://sarepta.helsedir.no/tema/Samhandling%20i%20pasientforl%C3%B8p).
-
-### Initial request example
-
-Example of an initial request can be found [here](https://git.sarepta.ehelse.no/publisert/standarder/raw/master/eksempel/Dialogmelding/Dialogmelding-v1-0/Dialogmelding_foresporsel_PLO_v1-0.xml)
-which is the basis for `dialogMessage.xml`.
 
 ## Incoming messages
 
@@ -42,16 +49,10 @@ Incoming messages are sent to NHN using EDI Adapter.
 Incoming messages can contain an attachment (50% chance).
 Attachment consists of 1-3 `attachment.xml` nodes.
 
-## Local development
-
-Running the application locally:
-1. Replace the usage of `dialogMessagePublisher` with a fake one. 
-   See [Replacing dialogMessagePublisher with a fake](#Replacing-dialogMessagePublisher-with-a-fake) for more details.
-2. Run the application (typically by running the `App` class in your IDE).
 
 ### Configuration
 
-Relevant configuration for adjusting the frequency and toggle scheduler for dialog message on/off.
+Relevant configuration for adjusting the frequency and toggling schedulers on/off.
 
 | Property | Description                        | Type     |
 |----------|------------------------------------|----------|
@@ -59,21 +60,9 @@ Relevant configuration for adjusting the frequency and toggle scheduler for dial
 | enabled  | Toggle scheduler on/off            | Boolean  |
 | interval | How often scheduler sends messages | Duration |
 
-### Replacing dialogMessagePublisher with a fake
+## Dynamic scheduler configuration
 
-To run this locally (meaning without actually publishing to kafka topic) change the following in App.kt:
-```kotlin
-val dialogMessageGenerator = DialogMessageGenerator(dialogMessagePublisher)
-```
-
-to use `FakeDialogMessagePublisher` instead:
-```kotlin
-val dialogMessageGenerator = DialogMessageGenerator(FakeDialogMessagePublisher())
-```
-
-## Dynamic scheduler configuration 
-
-The service exposes endpoints for dynamic configuration of the scheduler:
+The service exposes endpoints for dynamic configuration of the schedulers:
 
 ### Get scheduler status
 
@@ -87,97 +76,59 @@ curl https://<host>/scheduler/status
 ```
 
 Example response:
-```
+```json
 {
-    "dialogMessages": {
+    "xmlDialogMessages": {
+        "enabled": false,
+        "interval": "PT5M",
+        "lastRunAt": null
+    },
+    "jsonDialogMessages": {
         "enabled": true,
-        "interval": "PT3M",
-        "lastRunAt": "2026-04-24T10:15:00Z"
+        "interval": "PT5M",
+        "lastRunAt": "2026-08-14T13:00:00Z"
     },
     "incomingMessages": {
         "enabled": true,
-        "interval": "PT4M",
-        "lastRunAt": "2026-04-24T10:14:30Z"
+        "interval": "PT5M",
+        "lastRunAt": "2026-08-14T12:55:00Z"
     }
 }
 ```
 
-### Stop dialog message scheduler
+### JSON dialog message scheduler
 
-`POST /scheduler/dialog-messages/stop`
+| Endpoint | Description |
+|---|---|
+| `POST /scheduler/json-dialog-messages/start` | Enable JSON message generation |
+| `POST /scheduler/json-dialog-messages/stop` | Disable JSON message generation |
+| `POST /scheduler/json-dialog-messages/interval/{seconds}` | Update interval (positive integer) |
 
-Disables generation of dialog messages.
+### XML dialog message scheduler
 
-```
-curl -X POST https://<host>/scheduler/dialog-messages/stop
-```
+| Endpoint | Description |
+|---|---|
+| `POST /scheduler/xml-dialog-messages/start` | Enable XML message generation |
+| `POST /scheduler/xml-dialog-messages/stop` | Disable XML message generation |
+| `POST /scheduler/xml-dialog-messages/interval/{seconds}` | Update interval (positive integer) |
 
-### Start dialog message scheduler
+### Incoming message scheduler
 
-`POST /scheduler/dialog-messages/start`
-
-Enables generation of dialog messages.
-
-```
-curl -X POST https://<host>/scheduler/dialog-messages/start
-```
-
-### Update dialog message interval
-
-`POST /scheduler/dialog-messages/interval/{seconds}`
-
-Updates the interval between generations of dialog messages. 
-`{seconds}` must be a positive integer
-
-```
-curl -X POST https://<host>/scheduler/dialog-messages/interval/300
-```
-
-### Stop incoming message scheduler
-
-`POST /scheduler/incoming-messages/stop`
-
-Disables generation of incoming messages.
-
-```
-curl -X POST https://<host>/scheduler/incoming-messages/stop
-```
-
-### Start incoming message scheduler
-
-`POST /scheduler/incoming-messages/start`
-
-Enables generation of incoming messages.
-
-```
-curl -X POST https://<host>/scheduler/incoming-messages/start
-```
-
-### Update incoming message interval
-
-`POST /scheduler/incoming-messages/interval/{seconds}`
-
-Updates the interval between generations of incoming messages. 
-`{seconds}` must be a positive integer
-
-```
-curl -X POST https://<host>/scheduler/incoming-messages/interval/30
-```
+| Endpoint | Description |
+|---|---|
+| `POST /scheduler/incoming-messages/start` | Enable incoming message generation |
+| `POST /scheduler/incoming-messages/stop` | Disable incoming message generation |
+| `POST /scheduler/incoming-messages/interval/{seconds}` | Update interval (positive integer) |
 
 ## Generating messages on demand
 
-The service exposes also endpoints for generating messages on demand.
-This can be useful for testing the message flow without waiting for the scheduler to trigger.
-You can specify the number of messages to generate using the `count` query parameter. 
-If `count` is not specified, it defaults to 1.
-Maximum value for `count` is 100 to prevent excessive load on the system.
+The service exposes endpoints for generating messages on demand.
+You can specify the number of messages using the `count` query parameter (default: 1, max: 100).
 Messages are generated with 1 second interval.
 
-### Generate dialog messages
-
-`GET /generate/dialog-messages?count={count}`
-
-### Generate incoming messages
-
-`GET /generate/incoming-messages?count={count}`
+| Endpoint | Description |
+|---|---|
+| `GET /generate/json-dialog-messages?count={count}` | Generate JSON dialog messages |
+| `GET /generate/xml-dialog-messages?count={count}` | Generate XML dialog messages |
+| `GET /generate/incoming-messages?count={count}` | Generate incoming messages |
 

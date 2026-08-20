@@ -22,35 +22,52 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import no.nav.helsemelding.messagegenerator.config.Config
-import no.nav.helsemelding.messagegenerator.config.DialogMessage
 import no.nav.helsemelding.messagegenerator.config.EdiAdapter
 import no.nav.helsemelding.messagegenerator.config.IncomingMessages
 import no.nav.helsemelding.messagegenerator.config.Kafka
 import no.nav.helsemelding.messagegenerator.config.Port
 import no.nav.helsemelding.messagegenerator.config.Scope
 import no.nav.helsemelding.messagegenerator.config.Server
+import no.nav.helsemelding.messagegenerator.config.TopicConfig
 import no.nav.helsemelding.messagegenerator.config.Topics
-import no.nav.helsemelding.messagegenerator.generator.DialogMessageGenerator
 import no.nav.helsemelding.messagegenerator.generator.FakeEdiAdapterClient
 import no.nav.helsemelding.messagegenerator.generator.IncomingMessageGenerator
+import no.nav.helsemelding.messagegenerator.generator.JsonDialogMessageGenerator
+import no.nav.helsemelding.messagegenerator.generator.XmlDialogMessageGenerator
 import no.nav.helsemelding.messagegenerator.model.SchedulerStatus
 import no.nav.helsemelding.messagegenerator.publisher.FakeDialogMessagePublisher
 import no.nav.helsemelding.messagegenerator.scheduler.SchedulerService
 import kotlin.time.Duration.Companion.minutes
 
 class RoutesSpec : StringSpec({
-    "/generate/dialog-messages endpoint triggers dialog message generation" {
+    "/generate/xml-dialog-messages endpoint triggers dialog message generation" {
         routesTestApplication { client ->
             val testCases = listOf(
-                "/generate/dialog-messages" to 1,
-                "/generate/dialog-messages?count=3" to 3
+                "/generate/xml-dialog-messages" to 1,
+                "/generate/xml-dialog-messages?count=3" to 3
             )
 
             testCases.forEach { (urlString, messageCount) ->
                 val response = client.get(urlString)
 
                 response.status shouldBe HttpStatusCode.OK
-                response.bodyAsText() shouldBe "Published $messageCount dialog messages."
+                response.bodyAsText() shouldBe "Published $messageCount xml dialog messages."
+            }
+        }
+    }
+
+    "/generate/json-dialog-messages endpoint triggers json dialog message generation" {
+        routesTestApplication { client ->
+            val testCases = listOf(
+                "/generate/json-dialog-messages" to 1,
+                "/generate/json-dialog-messages?count=3" to 3
+            )
+
+            testCases.forEach { (urlString, messageCount) ->
+                val response = client.get(urlString)
+
+                response.status shouldBe HttpStatusCode.OK
+                response.bodyAsText() shouldBe "Published $messageCount json dialog messages."
             }
         }
     }
@@ -81,10 +98,15 @@ class RoutesSpec : StringSpec({
 
             val statusResponse = response.body<Map<String, SchedulerStatus>>()
 
-            val dialogMessageScheduler = statusResponse["dialogMessages"]
+            val dialogMessageScheduler = statusResponse["xmlDialogMessages"]
             dialogMessageScheduler.shouldNotBeNull()
             dialogMessageScheduler.enabled shouldBe true
             dialogMessageScheduler.interval shouldBe 3.minutes
+
+            val jsonDialogMessageScheduler = statusResponse["jsonDialogMessages"]
+            jsonDialogMessageScheduler.shouldNotBeNull()
+            jsonDialogMessageScheduler.enabled shouldBe true
+            jsonDialogMessageScheduler.interval shouldBe 3.minutes
 
             val incomingMessagesScheduler = statusResponse["incomingMessages"]
             incomingMessagesScheduler.shouldNotBeNull()
@@ -96,7 +118,8 @@ class RoutesSpec : StringSpec({
     "/stop endpoints disable schedulers" {
         routesTestApplication { client ->
             val testCases = listOf(
-                listOf("/scheduler/dialog-messages/stop", "dialogMessages"),
+                listOf("/scheduler/xml-dialog-messages/stop", "xmlDialogMessages"),
+                listOf("/scheduler/json-dialog-messages/stop", "jsonDialogMessages"),
                 listOf("/scheduler/incoming-messages/stop", "incomingMessages")
             )
 
@@ -121,7 +144,8 @@ class RoutesSpec : StringSpec({
     "/start endpoints enable schedulers" {
         routesTestApplication(enableSchedulers = false) { client ->
             val testCases = listOf(
-                listOf("/scheduler/dialog-messages/start", "dialogMessages"),
+                listOf("/scheduler/xml-dialog-messages/start", "xmlDialogMessages"),
+                listOf("/scheduler/json-dialog-messages/start", "jsonDialogMessages"),
                 listOf("/scheduler/incoming-messages/start", "incomingMessages")
             )
 
@@ -146,7 +170,8 @@ class RoutesSpec : StringSpec({
     "/interval/{intervalSeconds} endpoint changes interval for scheduler" {
         routesTestApplication { client ->
             val testCases = listOf(
-                listOf("/scheduler/dialog-messages/interval", "dialogMessages"),
+                listOf("/scheduler/xml-dialog-messages/interval", "xmlDialogMessages"),
+                listOf("/scheduler/json-dialog-messages/interval", "jsonDialogMessages"),
                 listOf("/scheduler/incoming-messages/interval", "incomingMessages")
             )
 
@@ -170,8 +195,10 @@ class RoutesSpec : StringSpec({
     "/interval/{intervalSeconds} endpoint rejects non-positive values" {
         routesTestApplication { client ->
             val testCases = listOf(
-                listOf("/scheduler/dialog-messages/interval", 0),
-                listOf("/scheduler/dialog-messages/interval", -60),
+                listOf("/scheduler/xml-dialog-messages/interval", 0),
+                listOf("/scheduler/xml-dialog-messages/interval", -60),
+                listOf("/scheduler/json-dialog-messages/interval", 0),
+                listOf("/scheduler/json-dialog-messages/interval", -60),
                 listOf("/scheduler/incoming-messages/interval", 0),
                 listOf("/scheduler/incoming-messages/interval", -60)
             )
@@ -195,7 +222,8 @@ private fun routesTestApplication(
         configureContentNegotiation()
         configureRoutes(
             registry = PrometheusMeterRegistry(PrometheusConfig.DEFAULT),
-            dialogMessageGenerator = DialogMessageGenerator(FakeDialogMessagePublisher()),
+            xmlDialogMessageGenerator = XmlDialogMessageGenerator(FakeDialogMessagePublisher()),
+            jsonDialogMessageGenerator = JsonDialogMessageGenerator(FakeDialogMessagePublisher()),
             incomingMessageGenerator = IncomingMessageGenerator(
                 ediAdapterClient = FakeEdiAdapterClient(),
                 template = "<MsgHead></MsgHead>",
@@ -230,8 +258,13 @@ private fun testSchedulerService(enableSchedulers: Boolean): SchedulerService {
             truststoreLocation = Kafka.TruststoreLocation("/tmp/truststore.jks"),
             truststorePassword = Masked("secret"),
             topics = Topics(
-                dialogMessage = DialogMessage(
-                    topic = "dialog-topic",
+                dialogMessageXml = TopicConfig(
+                    topic = "dialog-topic-xml",
+                    enabled = enableSchedulers,
+                    interval = 3.minutes
+                ),
+                dialogMessageJson = TopicConfig(
+                    topic = "dialog-topic-json",
                     enabled = enableSchedulers,
                     interval = 3.minutes
                 )
@@ -247,7 +280,8 @@ private fun testSchedulerService(enableSchedulers: Boolean): SchedulerService {
     return SchedulerService(
         scope = scope,
         config = config,
-        dialogMessageGenerator = DialogMessageGenerator(FakeDialogMessagePublisher()),
+        xmlDialogMessageGenerator = XmlDialogMessageGenerator(FakeDialogMessagePublisher()),
+        jsonDialogMessageGenerator = JsonDialogMessageGenerator(FakeDialogMessagePublisher()),
         incomingMessageGenerator = IncomingMessageGenerator(
             ediAdapterClient = FakeEdiAdapterClient(),
             template = "<MsgHead></MsgHead>",

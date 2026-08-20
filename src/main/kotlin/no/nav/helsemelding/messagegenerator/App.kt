@@ -10,12 +10,14 @@ import io.ktor.server.netty.Netty
 import io.ktor.utils.io.CancellationException
 import io.micrometer.prometheus.PrometheusMeterRegistry
 import kotlinx.coroutines.awaitCancellation
-import no.nav.helsemelding.messagegenerator.generator.DialogMessageGenerator
 import no.nav.helsemelding.messagegenerator.generator.IncomingMessageGenerator
+import no.nav.helsemelding.messagegenerator.generator.JsonDialogMessageGenerator
+import no.nav.helsemelding.messagegenerator.generator.XmlDialogMessageGenerator
 import no.nav.helsemelding.messagegenerator.plugin.configureContentNegotiation
 import no.nav.helsemelding.messagegenerator.plugin.configureMetrics
 import no.nav.helsemelding.messagegenerator.plugin.configureRoutes
-import no.nav.helsemelding.messagegenerator.publisher.DialogMessagePublisher
+import no.nav.helsemelding.messagegenerator.publisher.JsonDialogMessagePublisher
+import no.nav.helsemelding.messagegenerator.publisher.XmlDialogMessagePublisher
 import no.nav.helsemelding.messagegenerator.scheduler.SchedulerService
 import no.nav.helsemelding.messagegenerator.util.coroutineScope
 
@@ -27,15 +29,19 @@ fun main() = SuspendApp {
             val deps = dependencies()
             val scope = coroutineScope(coroutineContext)
 
-            val dialogMessagePublisher = DialogMessagePublisher(deps.kafkaPublisher)
-            val dialogMessageGenerator = DialogMessageGenerator(dialogMessagePublisher)
+            val xmlDialogMessagePublisher = XmlDialogMessagePublisher(deps.kafkaPublisher)
+            val xmlDialogMessageGenerator = XmlDialogMessageGenerator(xmlDialogMessagePublisher)
+
+            val jsonDialogMessagePublisher = JsonDialogMessagePublisher(deps.jsonKafkaPublisher)
+            val jsonDialogMessageGenerator = JsonDialogMessageGenerator(jsonDialogMessagePublisher)
 
             val incomingMessageGenerator = IncomingMessageGenerator(deps.ediAdapterClient)
 
             val schedulerService = SchedulerService(
                 scope = scope,
                 config = config(),
-                dialogMessageGenerator = dialogMessageGenerator,
+                xmlDialogMessageGenerator = xmlDialogMessageGenerator,
+                jsonDialogMessageGenerator = jsonDialogMessageGenerator,
                 incomingMessageGenerator = incomingMessageGenerator
             )
 
@@ -45,7 +51,8 @@ fun main() = SuspendApp {
                 preWait = config().server.preWait,
                 module = messageGeneratorModule(
                     deps.meterRegistry,
-                    dialogMessageGenerator,
+                    xmlDialogMessageGenerator,
+                    jsonDialogMessageGenerator,
                     incomingMessageGenerator,
                     schedulerService
                 )
@@ -61,7 +68,8 @@ fun main() = SuspendApp {
 
 internal fun messageGeneratorModule(
     meterRegistry: PrometheusMeterRegistry,
-    dialogMessageGenerator: DialogMessageGenerator,
+    xmlDialogMessageGenerator: XmlDialogMessageGenerator,
+    jsonDialogMessageGenerator: JsonDialogMessageGenerator,
     incomingMessageGenerator: IncomingMessageGenerator,
     schedulerService: SchedulerService
 ): Application.() -> Unit {
@@ -70,7 +78,8 @@ internal fun messageGeneratorModule(
         configureContentNegotiation()
         configureRoutes(
             meterRegistry,
-            dialogMessageGenerator,
+            xmlDialogMessageGenerator,
+            jsonDialogMessageGenerator,
             incomingMessageGenerator,
             schedulerService
         )

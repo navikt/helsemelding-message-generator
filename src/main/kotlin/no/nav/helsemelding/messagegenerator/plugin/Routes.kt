@@ -13,8 +13,9 @@ import io.ktor.server.routing.routing
 import io.micrometer.prometheus.PrometheusMeterRegistry
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
-import no.nav.helsemelding.messagegenerator.generator.DialogMessageGenerator
 import no.nav.helsemelding.messagegenerator.generator.IncomingMessageGenerator
+import no.nav.helsemelding.messagegenerator.generator.JsonDialogMessageGenerator
+import no.nav.helsemelding.messagegenerator.generator.XmlDialogMessageGenerator
 import no.nav.helsemelding.messagegenerator.scheduler.SchedulerService
 import kotlin.time.Duration.Companion.seconds
 
@@ -22,14 +23,16 @@ private val log = KotlinLogging.logger {}
 
 fun Application.configureRoutes(
     registry: PrometheusMeterRegistry,
-    dialogMessageGenerator: DialogMessageGenerator,
+    xmlDialogMessageGenerator: XmlDialogMessageGenerator,
+    jsonDialogMessageGenerator: JsonDialogMessageGenerator,
     incomingMessageGenerator: IncomingMessageGenerator,
     schedulerService: SchedulerService
 ) {
     routing {
         internalRoutes(registry)
         externalRoutes(
-            dialogMessageGenerator,
+            xmlDialogMessageGenerator,
+            jsonDialogMessageGenerator,
             incomingMessageGenerator,
             schedulerService
         )
@@ -51,25 +54,42 @@ fun Route.internalRoutes(registry: PrometheusMeterRegistry) {
 }
 
 fun Route.externalRoutes(
-    dialogMessageGenerator: DialogMessageGenerator,
+    xmlDialogMessageGenerator: XmlDialogMessageGenerator,
+    jsonDialogMessageGenerator: JsonDialogMessageGenerator,
     incomingMessageGenerator: IncomingMessageGenerator,
     schedulerService: SchedulerService
 ) {
     route("/generate") {
-        get("/dialog-messages") {
+        get("/xml-dialog-messages") {
             var count = call.request.queryParameters["count"]?.toIntOrNull() ?: 1
             if (count > 100) count = 100
 
             var published = 0
             coroutineScope {
                 repeat(count) {
-                    dialogMessageGenerator.generateMessages(this)
+                    xmlDialogMessageGenerator.generateMessages(this)
                     published++
                     if (it < count - 1) delay(1000)
                 }
             }
 
-            call.respondText("Published $published dialog messages.")
+            call.respondText("Published $published xml dialog messages.")
+        }
+
+        get("/json-dialog-messages") {
+            var count = call.request.queryParameters["count"]?.toIntOrNull() ?: 1
+            if (count > 100) count = 100
+
+            var published = 0
+            coroutineScope {
+                repeat(count) {
+                    jsonDialogMessageGenerator.generateMessages(this)
+                    published++
+                    if (it < count - 1) delay(1000)
+                }
+            }
+
+            call.respondText("Published $published json dialog messages.")
         }
 
         get("/incoming-messages") {
@@ -90,11 +110,13 @@ fun Route.externalRoutes(
     route("/scheduler") {
         get("/status") {
             try {
-                val dialogStatus = schedulerService.dialogMessages.status()
+                val xmlDialogStatus = schedulerService.xmlDialogMessages.status()
+                val jsonDialogStatus = schedulerService.jsonDialogMessages.status()
                 val incomingStatus = schedulerService.incomingMessages.status()
                 call.respond(
                     mapOf(
-                        "dialogMessages" to dialogStatus,
+                        "xmlDialogMessages" to xmlDialogStatus,
+                        "jsonDialogMessages" to jsonDialogStatus,
                         "incomingMessages" to incomingStatus
                     )
                 )
@@ -104,15 +126,15 @@ fun Route.externalRoutes(
             }
         }
 
-        route("/dialog-messages") {
+        route("/xml-dialog-messages") {
             post("/start") {
-                schedulerService.dialogMessages.start()
-                call.respondText("Dialog messages scheduler started.")
+                schedulerService.xmlDialogMessages.start()
+                call.respondText("XML dialog messages scheduler started.")
             }
 
             post("/stop") {
-                schedulerService.dialogMessages.stop()
-                call.respondText("Dialog messages scheduler stopped.")
+                schedulerService.xmlDialogMessages.stop()
+                call.respondText("XML dialog messages scheduler stopped.")
             }
 
             post("/interval/{intervalSeconds}") {
@@ -122,9 +144,33 @@ fun Route.externalRoutes(
                     return@post
                 }
 
-                schedulerService.dialogMessages.updateInterval(intervalSeconds.seconds)
+                schedulerService.xmlDialogMessages.updateInterval(intervalSeconds.seconds)
 
-                call.respondText("Dialog messages scheduler interval updated to $intervalSeconds seconds.")
+                call.respondText("XML dialog messages scheduler interval updated to $intervalSeconds seconds.")
+            }
+        }
+
+        route("/json-dialog-messages") {
+            post("/start") {
+                schedulerService.jsonDialogMessages.start()
+                call.respondText("Json dialog messages scheduler started.")
+            }
+
+            post("/stop") {
+                schedulerService.jsonDialogMessages.stop()
+                call.respondText("Json dialog messages scheduler stopped.")
+            }
+
+            post("/interval/{intervalSeconds}") {
+                val intervalSeconds = call.parameters["intervalSeconds"]?.toLongOrNull()
+                if (intervalSeconds == null || intervalSeconds <= 0) {
+                    call.respondText("Invalid interval. Please provide a positive number of seconds.", status = HttpStatusCode.BadRequest)
+                    return@post
+                }
+
+                schedulerService.jsonDialogMessages.updateInterval(intervalSeconds.seconds)
+
+                call.respondText("Json dialog messages scheduler interval updated to $intervalSeconds seconds.")
             }
         }
 

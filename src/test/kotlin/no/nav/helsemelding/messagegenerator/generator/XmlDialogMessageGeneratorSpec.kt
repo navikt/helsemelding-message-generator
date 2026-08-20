@@ -16,7 +16,7 @@ import no.nav.helsemelding.messagegenerator.util.readFileToString
 import no.nav.helsemelding.messagegenerator.util.replaceInTemplate
 import kotlin.uuid.Uuid
 
-class DialogMessageGeneratorSpec : StringSpec(
+class XmlDialogMessageGeneratorSpec : StringSpec(
     {
         "Replaces values in xml template" {
             val xml = readFileToString("templates/dialogMessage.xml")!!
