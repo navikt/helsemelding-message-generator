@@ -37,7 +37,7 @@
                     <FamilyName>Nordmann</FamilyName>
                     <GivenName>Silje</GivenName>
                     <Ident>
-                        <Id>2000</Id>
+                        <Id>{senderHerId}</Id>
                         <TypeId V="HER" S="2.16.578.1.12.4.1.1.8116" DN="HER-id"/>
                     </Ident>
                     <Ident>
