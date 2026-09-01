@@ -18,7 +18,7 @@ private const val BASE64_ENCODING = "base64"
 
 class IncomingMessageGenerator(
     private val ediAdapterClient: EdiAdapterClient,
-    private val template: String = readFileToString("templates/dialogMessage.xml") ?: "",
+    private val template: String = readFileToString("templates/incomingMessage.xml") ?: "",
     private val attachmentTemplate: String = readFileToString("templates/attachment.xml") ?: "",
     private val names: List<String> = readFileToList("names.txt").orEmpty(),
     private val messages: List<String> = readFileToList("messages.txt").orEmpty()
