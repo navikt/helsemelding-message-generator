@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- -->
+<!-- Dette er en testmelding med fiktive personer -->
+<!-- -->
+<MsgHead xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.kith.no/xmlstds/msghead/2006-05-24" xsi:schemaLocation="http://www.kith.no/xmlstds/msghead/2006-05-24 MsgHead-v1_2.xsd">
+    <MsgInfo>
+        <Type DN="Notat" V="DIALOG_NOTAT"/>
+        <MIGversion>v1.2 2006-05-24</MIGversion>
+        <GenDate>{genDate}</GenDate>
+        <MsgId>{messageId}</MsgId>
+        <ConversationRef>
+            <RefToParent>{messageId}</RefToParent>
+            <RefToConversation>{messageId}</RefToConversation>
+        </ConversationRef>
+        <Sender>
+            <Organisation>
+                <OrganisationName>Hov Legesenter</OrganisationName>
+                <Ident>
+                    <Id>976642139</Id>
+                    <TypeId V="ENH" S="2.16.578.1.12.4.1.1.9051" DN="Organisasjonsnummeret i Enhetsregister (Brønnøysund)"/>
+                </Ident>
+                <Ident>
+                    <Id>123456789</Id>
+                    <TypeId V="HER" S="2.16.578.1.12.4.1.1.9051" DN="Identifikator fra Helsetjenesteenhetsregisteret (HER-id)"/>
+                </Ident>
+                <Address>
+                    <Type V="PST" DN="Postadresse"/>
+                    <StreetAdr>Testveien 1</StreetAdr>
+                    <PostalCode>0001</PostalCode>
+                    <City>TESTBY</City>
+                </Address>
+                <TeleCom>
+                    <TypeTelecom V="HP" DN="Hovedtelefon"/>
+                    <TeleAddress V="tel:11111111"/>
+                </TeleCom>
+                <HealthcareProfessional>
+                    <FamilyName>Nordmann</FamilyName>
+                    <GivenName>Silje</GivenName>
+                    <Ident>
+                        <Id>{senderHerId}</Id>
+                        <TypeId V="HER" S="2.16.578.1.12.4.1.1.8116" DN="HER-id"/>
+                    </Ident>
+                    <Ident>
+                        <Id>100000</Id>
+                        <TypeId V="HPR" S="2.16.578.1.12.4.1.1.8116" DN="HPR-nummer"/>
+                    </Ident>
+                    <Ident>
+                        <Id>12345678910</Id>
+                        <TypeId V="FNR" S="2.16.578.1.12.4.1.1.8116" DN="Fødselsnummer"/>
+                    </Ident>
+                    <TeleCom>
+                        <TypeTelecom V="HP" DN="Hovedtelefon"/>
+                        <TeleAddress V="tel:11111111"/>
+                    </TeleCom>
+                </HealthcareProfessional>
+            </Organisation>
+        </Sender>
+        <Receiver>
+            <Organisation>
+                <OrganisationName>NAV</OrganisationName>
+                <Ident>
+                    <Id>889640782</Id>
+                    <TypeId V="ENH" S="2.16.578.1.12.4.1.1.9051" DN="Organisasjonsnummeret i Enhetsregister (Brønnøysund)"/>
+                </Ident>
+                <Ident>
+                    <Id>{receiverHerId}</Id>
+                    <TypeId V="HER" S="2.16.578.1.12.4.1.1.9051" DN="Identifikator fra Helsetjenesteenhetsregisteret (HER-id)"/>
+                </Ident>
+            </Organisation>
+        </Receiver>
+        <Patient>
+            <FamilyName>Nilssen</FamilyName>
+            <GivenName>{patientName}</GivenName>
+            <DateOfBirth>1984-10-13</DateOfBirth>
+            <Sex V="1" DN="Mann"/>
+            <Ident>
+                <Id>12345678900</Id>
+                <TypeId V="FNR" S="2.16.578.1.12.4.1.1.8116" DN="Fødselsnummer"/>
+            </Ident>
+            <Address>
+                <Type V="PST" DN="Postadresse"/>
+                <StreetAdr>TESTVEIEN 1</StreetAdr>
+                <PostalCode>0001</PostalCode>
+                <City>TESTBY</City>
+                <County V="0000" DN="TESTKOMMUNE"/>
+            </Address>
+            <TeleCom>
+                <TypeTelecom V="MC" DN="Mobiltelefon"/>
+                <TeleAddress V="tel:99999999"/>
+            </TeleCom>
+        </Patient>
+    </MsgInfo>
+    <Document>
+        <RefDoc>
+            <MsgType DN="XML-instans" V="XML"/>
+            <Content>
+                <Dialogmelding xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns="http://www.kith.no/xmlstds/dialog/2006-10-11" xsi:schemaLocation="http://www.kith.no/xmlstds/dialog/2006-10-11 dialogmelding.xsd">
+                    <Notat>
+                        <TemaKodet V="2" S="2.16.578.1.12.4.1.1.8128" DN="Henvendelse om pasient" OT="Benyttes når henvendelsen gjelder en pasient som er sykmeldt, evt henvendelser knyttet til et tidligere sykefraværstilfelle."/>
+                        <TekstNotatInnhold xsi:type="xsd:string">{message}</TekstNotatInnhold>
+                        <DokIdNotat>OD1012312250337</DokIdNotat>
+                        <DatoNotat>{genDate}</DatoNotat>
+                    </Notat>
+                </Dialogmelding>
+            </Content>
+        </RefDoc>
+    </Document>
+    {attachments}
+</MsgHead>
