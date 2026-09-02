@@ -20,7 +20,7 @@
                     <TypeId V="ENH" S="2.16.578.1.12.4.1.1.9051" DN="Organisasjonsnummeret i Enhetsregister (Brønnøysund)"/>
                 </Ident>
                 <Ident>
-                    <Id>{senderHerId}</Id>
+                    <Id>123456789</Id>
                     <TypeId V="HER" S="2.16.578.1.12.4.1.1.9051" DN="Identifikator fra Helsetjenesteenhetsregisteret (HER-id)"/>
                 </Ident>
                 <Address>
@@ -98,7 +98,7 @@
                     <Notat>
                         <TemaKodet V="2" S="2.16.578.1.12.4.1.1.8128" DN="Henvendelse om pasient" OT="Benyttes når henvendelsen gjelder en pasient som er sykmeldt, evt henvendelser knyttet til et tidligere sykefraværstilfelle."/>
                         <TekstNotatInnhold xsi:type="xsd:string">{message}</TekstNotatInnhold>
-                        <DokIdNotat>{messageId}</DokIdNotat>
+                        <DokIdNotat>OD1012312250337</DokIdNotat>
                         <DatoNotat>{genDate}</DatoNotat>
                     </Notat>
                 </Dialogmelding>
