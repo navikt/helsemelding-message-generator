@@ -1,12 +1,12 @@
 # helsemelding-message-generator
 
 An application with scheduler(s) for producing fake outgoing messages in dev to the following kafka topic(s):
-- `helsemelding.dialog.out.json` (dialog message in JSON format) — used by [helsemelding-outbound-processing-service](https://github.com/navikt/helsemelding-outbound-processing-service)
+- `helsemelding.dialog.out` (dialog message in JSON format) — used by [helsemelding-outbound-processing-service](https://github.com/navikt/helsemelding-outbound-processing-service)
 - `helsemelding.dialog.out.xml` (dialog message in XML format) — **disabled**, kept for reference
 
 ## Outgoing dialog messages (JSON)
 
-JSON messages are published to `helsemelding.dialog.out.json` and conform to the `OutgoingDialogMessage` schema
+JSON messages are published to `helsemelding.dialog.out` and conform to the `OutgoingDialogMessage` schema
 from `helsemelding-json-schema`. Data is loaded from the following resource files:
 - `messages.txt` — message texts
 - `patient-idents.txt` — patient identifiers
