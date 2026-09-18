@@ -34,7 +34,7 @@ class JsonDialogMessageGenerator(
     internal fun buildMessage() =
         OutgoingDialogMessage(
             version = 1,
-            id = Uuid.random().toString(),
+            id = Uuid.random(),
             patientIdent = patientIdents.random(),
             providerId = providerIds.random(),
             conversationReference = null,

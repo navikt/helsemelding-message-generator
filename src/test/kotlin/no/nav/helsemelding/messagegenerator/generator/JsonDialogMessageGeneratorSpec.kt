@@ -20,7 +20,6 @@ class JsonDialogMessageGeneratorSpec : StringSpec(
         "Generates a valid OutgoingDialogMessage" {
             val message = generator(Random.Default).buildMessage()
 
-            Uuid.parseOrNull(message.id) shouldNotBe null
             message.version shouldBe 1
             message.patientIdent shouldBe "01449105539"
             message.providerId shouldBe "d5741bae-3fc2-420d-ac82-055ffd7c4cb4"
@@ -72,7 +71,7 @@ class JsonDialogMessageGeneratorSpec : StringSpec(
             call.withoutHeader shouldBe false
 
             val decoded = Json.decodeFromString(OutgoingDialogMessage.serializer(), call.value)
-            Uuid.parseOrNull(decoded.id) shouldNotBe null
+
             decoded.version shouldBe 1
             decoded.patientIdent shouldBe "01449105539"
             decoded.providerId shouldBe "d5741bae-3fc2-420d-ac82-055ffd7c4cb4"

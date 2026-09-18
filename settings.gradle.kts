@@ -25,7 +25,7 @@ dependencyResolutionManagement {
             version("logback", "1.4.11")
             version("logstash", "7.4")
             version("edi-adapter-client", "0.0.7")
-            version("json-schema-core", "0.0.4")
+            version("json-schema-core", "0.0.5")
 
             library("arrow-core", "io.arrow-kt", "arrow-core").versionRef("arrow")
             library("arrow-functions", "io.arrow-kt", "arrow-functions").versionRef("arrow")
