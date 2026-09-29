@@ -33,17 +33,17 @@ class JsonDialogMessagePublisher(
         includeSourceSystemHeader: Boolean
     ): Result<RecordMetadata> = kafkaPublisher
         .publishScope {
-            publishCatching(toProducerRecord(referenceId, message, includeSourceSystemHeader))
+            publishCatching(toProducerRecord(message, includeSourceSystemHeader))
         }
         .onSuccess { log.info { "Published JSON message with reference id: $referenceId to topic: ${kafka.dialogMessageJson.topic}" } }
         .onFailure { t -> log.error { "Failed to publish JSON message with reference id: $referenceId: ${t.stackTraceToString()}" } }
 
-    private fun toProducerRecord(referenceId: String?, message: String, includeSourceSystemHeader: Boolean) =
+    private fun toProducerRecord(message: String, includeSourceSystemHeader: Boolean) =
         ProducerRecord<String?, String>(
             kafka.dialogMessageJson.topic,
             null,
             null,
-            referenceId,
+            null,
             message
         ).also { record ->
             if (includeSourceSystemHeader) record.headers().add(RecordHeader(SOURCE_SYSTEM_HEADER, SOURCE_SYSTEM.toByteArray()))
