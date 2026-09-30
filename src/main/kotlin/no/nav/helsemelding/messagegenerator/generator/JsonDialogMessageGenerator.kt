@@ -47,10 +47,9 @@ class JsonDialogMessageGenerator(
         val uuid = Uuid.random().toString()
         val validJson = json.encodeToString(OutgoingDialogMessage.serializer(), buildMessage())
         when (random.nextInt(10)) {
-            0 -> messagePublisher.publish("not-a-valid-uuid", validJson)
-            1 -> messagePublisher.publish(uuid, "{ invalid json {{{")
-            2 -> messagePublisher.publish(uuid, """{"foo": "bar"}""")
-            3 -> messagePublisher.publishWithoutHeader(uuid, validJson)
+            0 -> messagePublisher.publish(uuid, "{ invalid json {{{")
+            1 -> messagePublisher.publish(uuid, """{"foo": "bar"}""")
+            2 -> messagePublisher.publishWithoutHeader(uuid, validJson)
             else -> messagePublisher.publish(uuid, validJson)
         }
     }

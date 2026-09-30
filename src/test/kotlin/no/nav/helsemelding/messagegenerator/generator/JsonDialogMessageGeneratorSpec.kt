@@ -26,18 +26,9 @@ class JsonDialogMessageGeneratorSpec : StringSpec(
             message.message shouldBe "Test message"
         }
 
-        "publishNext sends message with invalid key" {
-            val publisher = CapturingPublisher()
-            generator(FixedRandom(0), publisher).publishNext()
-
-            val call = publisher.calls.first()
-            Uuid.parseOrNull(call.key!!) shouldBe null
-            call.withoutHeader shouldBe false
-        }
-
         "publishNext sends invalid JSON" {
             val publisher = CapturingPublisher()
-            generator(FixedRandom(2), publisher).publishNext()
+            generator(FixedRandom(0), publisher).publishNext()
 
             val call = publisher.calls.first()
             Uuid.parseOrNull(call.key!!) shouldNotBe null
@@ -46,7 +37,7 @@ class JsonDialogMessageGeneratorSpec : StringSpec(
 
         "publishNext sends valid JSON with wrong structure" {
             val publisher = CapturingPublisher()
-            generator(FixedRandom(4), publisher).publishNext()
+            generator(FixedRandom(2), publisher).publishNext()
 
             val call = publisher.calls.first()
             Uuid.parseOrNull(call.key!!) shouldNotBe null
@@ -55,7 +46,7 @@ class JsonDialogMessageGeneratorSpec : StringSpec(
 
         "publishNext sends message without sourceSystem header" {
             val publisher = CapturingPublisher()
-            generator(FixedRandom(6), publisher).publishNext()
+            generator(FixedRandom(4), publisher).publishNext()
 
             val call = publisher.calls.first()
             Uuid.parseOrNull(call.key!!) shouldNotBe null
@@ -64,7 +55,7 @@ class JsonDialogMessageGeneratorSpec : StringSpec(
 
         "publishNext sends valid message" {
             val publisher = CapturingPublisher()
-            generator(FixedRandom(8), publisher).publishNext()
+            generator(FixedRandom(6), publisher).publishNext()
 
             val call = publisher.calls.first()
             Uuid.parseOrNull(call.key!!) shouldNotBe null

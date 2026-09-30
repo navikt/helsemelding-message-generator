@@ -18,11 +18,10 @@ Each message is randomly one of the following:
 
 | Outcome | Probability | Description |
 |---|---|---|
-| Valid message | 60% | Valid `OutgoingDialogMessage` with valid UUID key and `sourceSystem` header |
-| Invalid key | 10% | Valid JSON body, but key is not a UUID |
-| Invalid JSON | 10% | Key is valid UUID, body is not valid JSON |
-| Invalid structure | 10% | Key is valid UUID, body is valid JSON but not `OutgoingDialogMessage` |
-| Missing header | 10% | Key and body are valid, but `sourceSystem` header is not set |
+| Valid message | 70% | Valid `OutgoingDialogMessage` with `sourceSystem` header |
+| Invalid JSON | 10% | Body is not valid JSON |
+| Invalid structure | 10% | Body is valid JSON but not `OutgoingDialogMessage` |
+| Missing header | 10% | Valid `OutgoingDialogMessage` without the `sourceSystem` header |
 
 Messages include an attachment with 50% probability.
 
@@ -131,4 +130,3 @@ Messages are generated with 1 second interval.
 | `GET /generate/json-dialog-messages?count={count}` | Generate JSON dialog messages |
 | `GET /generate/xml-dialog-messages?count={count}` | Generate XML dialog messages |
 | `GET /generate/incoming-messages?count={count}` | Generate incoming messages |
-
