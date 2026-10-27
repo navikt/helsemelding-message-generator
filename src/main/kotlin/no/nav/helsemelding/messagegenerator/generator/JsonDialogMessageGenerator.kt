@@ -36,11 +36,11 @@ class JsonDialogMessageGenerator(
             version = 1,
             id = Uuid.random(),
             patientIdent = patientIdents.random(),
-            providerId = providerIds.random(),
+            providerId = "19768e29-1406-412e-8be2-5b095cf8a1f8", // HER-id: 8144630
             conversationReference = null,
-            type = OutgoingDialogMessageType.entries.random(),
-            message = messages.random(),
-            attachment = if (random.nextBoolean()) attachment else null
+            type = OutgoingDialogMessageType.PATIENT_REQUEST,
+            message = "Dette er en testmelding fra Nav til WebMed via EDI 2.0",
+            attachment = null
         )
 
     internal suspend fun publishNext() {

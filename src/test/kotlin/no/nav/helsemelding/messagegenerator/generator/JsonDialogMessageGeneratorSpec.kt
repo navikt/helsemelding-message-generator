@@ -22,8 +22,6 @@ class JsonDialogMessageGeneratorSpec : StringSpec(
 
             message.version shouldBe 1
             message.patientIdent shouldBe "01449105539"
-            message.providerId shouldBe "d5741bae-3fc2-420d-ac82-055ffd7c4cb4"
-            message.message shouldBe "Test message"
         }
 
         "publishNext sends invalid JSON" {
@@ -65,8 +63,6 @@ class JsonDialogMessageGeneratorSpec : StringSpec(
 
             decoded.version shouldBe 1
             decoded.patientIdent shouldBe "01449105539"
-            decoded.providerId shouldBe "d5741bae-3fc2-420d-ac82-055ffd7c4cb4"
-            decoded.message shouldBe "Test message"
         }
     }
 )
