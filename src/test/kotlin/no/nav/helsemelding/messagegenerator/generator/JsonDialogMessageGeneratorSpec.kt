@@ -24,33 +24,6 @@ class JsonDialogMessageGeneratorSpec : StringSpec(
             message.patientIdent shouldBe "01449105539"
         }
 
-        "publishNext sends invalid JSON" {
-            val publisher = CapturingPublisher()
-            generator(FixedRandom(0), publisher).publishNext()
-
-            val call = publisher.calls.first()
-            Uuid.parseOrNull(call.key!!) shouldNotBe null
-            call.value shouldBe "{ invalid json {{{"
-        }
-
-        "publishNext sends valid JSON with wrong structure" {
-            val publisher = CapturingPublisher()
-            generator(FixedRandom(2), publisher).publishNext()
-
-            val call = publisher.calls.first()
-            Uuid.parseOrNull(call.key!!) shouldNotBe null
-            call.value shouldBe """{"foo": "bar"}"""
-        }
-
-        "publishNext sends message without sourceSystem header" {
-            val publisher = CapturingPublisher()
-            generator(FixedRandom(4), publisher).publishNext()
-
-            val call = publisher.calls.first()
-            Uuid.parseOrNull(call.key!!) shouldNotBe null
-            call.withoutHeader shouldBe true
-        }
-
         "publishNext sends valid message" {
             val publisher = CapturingPublisher()
             generator(FixedRandom(6), publisher).publishNext()
