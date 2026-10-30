@@ -18,7 +18,7 @@ private class FixedRandom(private val bits: Int) : Random() {
 class JsonDialogMessageGeneratorSpec : StringSpec(
     {
         "Generates a valid OutgoingDialogMessage" {
-            val message = generator(Random.Default).buildMessage()
+            val message = generator(Random.Default).buildMessage(Uuid.random())
 
             message.version shouldBe 1
             message.patientIdent shouldBe "01449105539"

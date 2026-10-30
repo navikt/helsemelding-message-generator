@@ -31,10 +31,10 @@ class JsonDialogMessageGenerator(
             .flowOn(Dispatchers.IO)
             .launchIn(scope)
 
-    internal fun buildMessage() =
+    internal fun buildMessage(id: Uuid) =
         OutgoingDialogMessage(
             version = 1,
-            id = Uuid.random(),
+            id = id,
             patientIdent = patientIdents.random(),
             providerId = providerIds.random(),
             conversationReference = null,
@@ -44,13 +44,13 @@ class JsonDialogMessageGenerator(
         )
 
     internal suspend fun publishNext() {
-        val uuid = Uuid.random().toString()
-        val validJson = json.encodeToString(OutgoingDialogMessage.serializer(), buildMessage())
+        val uuid = Uuid.random()
+        val validJson = json.encodeToString(OutgoingDialogMessage.serializer(), buildMessage(uuid))
         when (random.nextInt(10)) {
-            0 -> messagePublisher.publish(uuid, "{ invalid json {{{")
-            1 -> messagePublisher.publish(uuid, """{"foo": "bar"}""")
-            2 -> messagePublisher.publishWithoutHeader(uuid, validJson)
-            else -> messagePublisher.publish(uuid, validJson)
+            0 -> messagePublisher.publish(uuid.toString(), "{ invalid json {{{")
+            1 -> messagePublisher.publish(uuid.toString(), """{"foo": "bar"}""")
+            2 -> messagePublisher.publishWithoutHeader(uuid.toString(), validJson)
+            else -> messagePublisher.publish(uuid.toString(), validJson)
         }
     }
 }
